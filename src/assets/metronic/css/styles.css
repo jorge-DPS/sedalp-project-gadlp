@@ -1,0 +1,19 @@
+/* Tailwind core */
+@import "tailwindcss";
+
+/* Tailwind scan sources */
+@source "../../../../node_modules/@keenthemes/ktui/src/components/alert/";
+@source "../../../../node_modules/@keenthemes/ktui/src/components/toast/";
+@source "../../../../node_modules/@keenthemes/ktui/src/components/rating/";
+
+/* Theme configs */
+@import "./config.ktui.css";
+
+/* KTUI styles */
+@import '../../../../node_modules/@keenthemes/ktui/styles.css';
+
+/* Metronic components */
+@import "./components/index.css";
+
+/* Demo 10 */
+@import "./demos/demo1.css";
