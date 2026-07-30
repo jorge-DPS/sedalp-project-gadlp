@@ -18,3 +18,4 @@ router.isReady().then(async () => {
     console.error('No se pudieron inicializar completamente los scripts de Metronic:', error)
   }
 })
+//

@@ -30,9 +30,7 @@ export function initializeTheme() {
 
 function loadScript(src) {
   return new Promise((resolve, reject) => {
-    const existing = document.querySelector(
-      `script[data-metronic-src="${src}"]`,
-    )
+    const existing = document.querySelector(`script[data-metronic-src="${src}"]`)
 
     if (existing) {
       if (existing.dataset.loaded === 'true') {
@@ -42,11 +40,9 @@ function loadScript(src) {
 
       existing.addEventListener('load', resolve, { once: true })
 
-      existing.addEventListener(
-        'error',
-        () => reject(new Error(`No se pudo cargar ${src}`)),
-        { once: true },
-      )
+      existing.addEventListener('error', () => reject(new Error(`No se pudo cargar ${src}`)), {
+        once: true,
+      })
 
       return
     }
@@ -105,10 +101,7 @@ export async function reinitializeMetronic() {
   ]
 
   components.forEach((component) => {
-    if (
-      component &&
-      typeof component.createInstances === 'function'
-    ) {
+    if (component && typeof component.createInstances === 'function') {
       component.createInstances()
     }
   })

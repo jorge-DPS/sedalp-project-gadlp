@@ -1,3 +1,4 @@
 <template>
+  <!-- principal -->
   <RouterView />
 </template>
