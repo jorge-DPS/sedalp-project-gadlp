@@ -159,6 +159,47 @@ const isMyAccountActive = computed(() => route.path.startsWith("/account"));
               </RouterLink>
             </div>
 
+            <!-- Access Control -->
+            <div class="pt-4 pb-1 px-2.5">
+              <span class="text-xs font-semibold uppercase text-muted-foreground">
+                Seguridad
+              </span>
+            </div>
+
+            <div
+              class="kt-menu-item"
+              :class="{ active: route.name === 'user-management' }"
+            >
+              <RouterLink
+                :to="{ name: 'user-management' }"
+                class="kt-menu-link gap-2.5 py-2 px-2.5 kt-menu-item-active:bg-secondary kt-menu-link-hover:bg-secondary"
+              >
+                <span class="kt-menu-icon items-start text-muted-foreground text-lg kt-menu-item-active:text-mono kt-menu-link-hover:text-mono">
+                  <i class="ki-filled ki-people"></i>
+                </span>
+                <span class="kt-menu-title text-sm text-foreground kt-menu-item-active:font-medium kt-menu-item-active:text-mono kt-menu-link-hover:text-mono">
+                  Administrar usuarios
+                </span>
+              </RouterLink>
+            </div>
+
+            <div
+              class="kt-menu-item"
+              :class="{ active: route.name === 'role-management' }"
+            >
+              <RouterLink
+                :to="{ name: 'role-management' }"
+                class="kt-menu-link gap-2.5 py-2 px-2.5 kt-menu-item-active:bg-secondary kt-menu-link-hover:bg-secondary"
+              >
+                <span class="kt-menu-icon items-start text-muted-foreground text-lg kt-menu-item-active:text-mono kt-menu-link-hover:text-mono">
+                  <i class="ki-filled ki-security-user"></i>
+                </span>
+                <span class="kt-menu-title text-sm text-foreground kt-menu-item-active:font-medium kt-menu-item-active:text-mono kt-menu-link-hover:text-mono">
+                  Administrar roles
+                </span>
+              </RouterLink>
+            </div>
+
             <!-- Public Profile -->
             <div
               class="kt-menu-item"

@@ -31,6 +31,18 @@ const router = createRouter({
             title: 'Integrations',
           },
         },
+        {
+          path: 'access-control/users',
+          name: 'user-management',
+          component: () => import('@/views/access-control/UserManagementView.vue'),
+          meta: { title: 'Administración de usuarios' },
+        },
+        {
+          path: 'access-control/roles',
+          name: 'role-management',
+          component: () => import('@/views/access-control/RoleManagementView.vue'),
+          meta: { title: 'Administración de roles' },
+        },
       ],
     },
   ],
