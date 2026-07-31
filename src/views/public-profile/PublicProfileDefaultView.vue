@@ -1,17 +1,12 @@
 <template>
-  <!-- Toolbar -->
+  <!-- Page toolbar -->
   <div class="pb-5">
     <!-- Container -->
-    <div
-      class="kt-container-fixed flex items-center justify-between flex-wrap gap-3"
-    >
+    <div class="kt-container-fixed flex items-center justify-between flex-wrap gap-3">
       <div class="flex flex-col flex-wrap gap-1">
         <h1 class="font-medium text-lg text-mono">Default</h1>
         <div class="flex items-center gap-1 text-sm font-normal">
-          <RouterLink
-            class="text-secondary-foreground hover:text-primary"
-            to="/"
-          >
+          <RouterLink class="text-secondary-foreground hover:text-primary" to="/">
             Home
           </RouterLink>
           <span class="text-muted-foreground text-sm"> / </span>
@@ -39,17 +34,13 @@
               <span class="flex items-center me-1">
                 <i class="ki-filled ki-calendar text-base!"> </i>
               </span>
-              <span class="hidden md:inline text-nowrap">
-                September, 2024
-              </span>
+              <span class="hidden md:inline text-nowrap"> September, 2024 </span>
               <span class="inline md:hidden text-nowrap"> Sep, 2024 </span>
               <span class="flex items-center lg:ms-4">
                 <i class="ki-filled ki-down text-xs!"> </i>
               </span>
             </button>
-            <div
-              class="kt-menu-dropdown w-48 py-2 kt-scrollable-y max-h-[250px]"
-            >
+            <div class="kt-menu-dropdown w-48 py-2 kt-scrollable-y max-h-[250px]">
               <div class="kt-menu-item">
                 <a class="kt-menu-link" href="#">
                   <span class="kt-menu-title"> January, 2024 </span>
@@ -122,17 +113,13 @@
   <div class="bg-center bg-cover bg-no-repeat hero-bg">
     <!-- Container -->
     <div class="kt-container-fixed">
-      <div
-        class="flex flex-col items-center gap-2 lg:gap-3.5 py-4 lg:pt-5 lg:pb-10"
-      >
+      <div class="flex flex-col items-center gap-2 lg:gap-3.5 py-4 lg:pt-5 lg:pb-10">
         <img
           class="rounded-full border-3 border-green-500 size-[100px] shrink-0"
           src="/media/avatars/300-1.png"
         />
         <div class="flex items-center gap-1.5">
-          <div class="text-lg leading-5 font-semibold text-mono">
-            Jenny Klabber
-          </div>
+          <div class="text-lg leading-5 font-semibold text-mono">Jenny Klabber</div>
           <svg
             class="text-primary"
             fill="none"
@@ -149,18 +136,12 @@
         </div>
         <div class="flex flex-wrap justify-center gap-1 lg:gap-4.5 text-sm">
           <div class="flex gap-1.25 items-center">
-            <i class="ki-filled ki-abstract-41 text-muted-foreground text-sm">
-            </i>
-            <span class="text-secondary-foreground font-medium">
-              KeenThemes
-            </span>
+            <i class="ki-filled ki-abstract-41 text-muted-foreground text-sm"> </i>
+            <span class="text-secondary-foreground font-medium"> KeenThemes </span>
           </div>
           <div class="flex gap-1.25 items-center">
-            <i class="ki-filled ki-geolocation text-muted-foreground text-sm">
-            </i>
-            <span class="text-secondary-foreground font-medium">
-              SF, Bay Area
-            </span>
+            <i class="ki-filled ki-geolocation text-muted-foreground text-sm"> </i>
+            <span class="text-secondary-foreground font-medium"> SF, Bay Area </span>
           </div>
           <div class="flex gap-1.25 items-center">
             <i class="ki-filled ki-sms text-muted-foreground text-sm"> </i>
@@ -250,52 +231,27 @@
                   <div class="kt-menu-link" tabindex="0">
                     <span class="kt-menu-title"> More </span>
                     <span class="kt-menu-arrow">
-                      <i
-                        class="ki-filled ki-down text-xs in-[.kt-menu-dropdown]:-rotate-90"
-                      >
-                      </i>
+                      <i class="ki-filled ki-down text-xs in-[.kt-menu-dropdown]:-rotate-90"> </i>
                     </span>
                   </div>
-                  <div
-                    class="kt-menu-dropdown kt-menu-default py min-w-[200px]"
-                  >
+                  <div class="kt-menu-dropdown kt-menu-default py min-w-[200px]">
                     <div class="kt-menu-item">
-                      <a
-                        @click.prevent
-                        class="kt-menu-link"
-                        href="#"
-                        tabindex="0"
-                      >
+                      <a @click.prevent class="kt-menu-link" href="#" tabindex="0">
                         <span class="kt-menu-title"> Gamer </span>
                       </a>
                     </div>
                     <div class="kt-menu-item">
-                      <a
-                        @click.prevent
-                        class="kt-menu-link"
-                        href="#"
-                        tabindex="0"
-                      >
+                      <a @click.prevent class="kt-menu-link" href="#" tabindex="0">
                         <span class="kt-menu-title"> Feeds </span>
                       </a>
                     </div>
                     <div class="kt-menu-item">
-                      <a
-                        @click.prevent
-                        class="kt-menu-link"
-                        href="#"
-                        tabindex="0"
-                      >
+                      <a @click.prevent class="kt-menu-link" href="#" tabindex="0">
                         <span class="kt-menu-title"> Plain </span>
                       </a>
                     </div>
                     <div class="kt-menu-item">
-                      <a
-                        @click.prevent
-                        class="kt-menu-link"
-                        href="#"
-                        tabindex="0"
-                      >
+                      <a @click.prevent class="kt-menu-link" href="#" tabindex="0">
                         <span class="kt-menu-title"> Modal </span>
                       </a>
                     </div>
@@ -340,11 +296,7 @@
             <div
               class="kt-menu-item border-b-2 border-b-transparent kt-menu-item-active:border-b-primary kt-menu-item-here:border-b-primary"
             >
-              <a
-                @click.prevent
-                class="kt-menu-link gap-1.5 pb-2 lg:pb-4 px-2"
-                href="#"
-              >
+              <a @click.prevent class="kt-menu-link gap-1.5 pb-2 lg:pb-4 px-2" href="#">
                 <span
                   class="kt-menu-title text-nowrap font-medium text-sm text-secondary-foreground kt-menu-item-active:text-primary kt-menu-item-active:font-semibold kt-menu-item-here:text-primary kt-menu-item-here:font-semibold kt-menu-item-show:text-primary kt-menu-link-hover:text-primary"
                 >
@@ -355,11 +307,7 @@
             <div
               class="kt-menu-item border-b-2 border-b-transparent kt-menu-item-active:border-b-primary kt-menu-item-here:border-b-primary"
             >
-              <a
-                @click.prevent
-                class="kt-menu-link gap-1.5 pb-2 lg:pb-4 px-2"
-                href="#"
-              >
+              <a @click.prevent class="kt-menu-link gap-1.5 pb-2 lg:pb-4 px-2" href="#">
                 <span
                   class="kt-menu-title text-nowrap font-medium text-sm text-secondary-foreground kt-menu-item-active:text-primary kt-menu-item-active:font-semibold kt-menu-item-here:text-primary kt-menu-item-here:font-semibold kt-menu-item-show:text-primary kt-menu-link-hover:text-primary"
                 >
@@ -370,11 +318,7 @@
             <div
               class="kt-menu-item border-b-2 border-b-transparent kt-menu-item-active:border-b-primary kt-menu-item-here:border-b-primary"
             >
-              <a
-                @click.prevent
-                class="kt-menu-link gap-1.5 pb-2 lg:pb-4 px-2"
-                href="#"
-              >
+              <a @click.prevent class="kt-menu-link gap-1.5 pb-2 lg:pb-4 px-2" href="#">
                 <span
                   class="kt-menu-title text-nowrap font-medium text-sm text-secondary-foreground kt-menu-item-active:text-primary kt-menu-item-active:font-semibold kt-menu-item-here:text-primary kt-menu-item-here:font-semibold kt-menu-item-show:text-primary kt-menu-link-hover:text-primary"
                 >
@@ -385,11 +329,7 @@
             <div
               class="kt-menu-item border-b-2 border-b-transparent kt-menu-item-active:border-b-primary kt-menu-item-here:border-b-primary"
             >
-              <a
-                @click.prevent
-                class="kt-menu-link gap-1.5 pb-2 lg:pb-4 px-2"
-                href="#"
-              >
+              <a @click.prevent class="kt-menu-link gap-1.5 pb-2 lg:pb-4 px-2" href="#">
                 <span
                   class="kt-menu-title text-nowrap font-medium text-sm text-secondary-foreground kt-menu-item-active:text-primary kt-menu-item-active:font-semibold kt-menu-item-here:text-primary kt-menu-item-here:font-semibold kt-menu-item-show:text-primary kt-menu-link-hover:text-primary"
                 >
@@ -439,9 +379,7 @@
           </div>
         </div>
       </div>
-      <div
-        class="flex items-center justify-end grow lg:grow-0 lg:pb-4 gap-2.5 mb-3 lg:mb-0"
-      >
+      <div class="flex items-center justify-end grow lg:grow-0 lg:pb-4 gap-2.5 mb-3 lg:mb-0">
         <button class="kt-btn kt-btn-primary">
           <i class="ki-filled ki-users"> </i>
           Connect
@@ -461,10 +399,7 @@
           >
             <i class="ki-filled ki-dots-vertical"> </i>
           </button>
-          <div
-            class="kt-dropdown-menu w-full max-w-[220px]"
-            data-kt-dropdown-menu="true"
-          >
+          <div class="kt-dropdown-menu w-full max-w-[220px]" data-kt-dropdown-menu="true">
             <ul class="kt-dropdown-menu-sub">
               <li>
                 <button
@@ -552,10 +487,7 @@
                   <div
                     class="absolute leading-none start-2/4 top-2/4 -translate-y-2/4 -translate-x-2/4 rtl:translate-x-2/4"
                   >
-                    <i
-                      class="ki-filled ki-abstract-39 text-xl ps-px text-primary"
-                    >
-                    </i>
+                    <i class="ki-filled ki-abstract-39 text-xl ps-px text-primary"> </i>
                   </div>
                 </div>
                 <div class="relative size-[50px] shrink-0">
@@ -583,10 +515,7 @@
                   <div
                     class="absolute leading-none start-2/4 top-2/4 -translate-y-2/4 -translate-x-2/4 rtl:translate-x-2/4"
                   >
-                    <i
-                      class="ki-filled ki-abstract-44 text-xl ps-px text-yellow-600"
-                    >
-                    </i>
+                    <i class="ki-filled ki-abstract-44 text-xl ps-px text-yellow-600"> </i>
                   </div>
                 </div>
                 <div class="relative size-[50px] shrink-0">
@@ -614,10 +543,7 @@
                   <div
                     class="absolute leading-none inset-s-2/4 top-2/4 -translate-y-2/4 -translate-x-2/4 rtl:translate-x-2/4"
                   >
-                    <i
-                      class="ki-filled ki-abstract-25 text-xl ps-px text-green-600"
-                    >
-                    </i>
+                    <i class="ki-filled ki-abstract-25 text-xl ps-px text-green-600"> </i>
                   </div>
                 </div>
                 <div class="relative size-[50px] shrink-0">
@@ -645,10 +571,7 @@
                   <div
                     class="absolute leading-none start-2/4 top-2/4 -translate-y-2/4 -translate-x-2/4 rtl:translate-x-2/4"
                   >
-                    <i
-                      class="ki-filled ki-delivery-24 text-xl ps-px text-violet-600"
-                    >
-                    </i>
+                    <i class="ki-filled ki-delivery-24 text-xl ps-px text-violet-600"> </i>
                   </div>
                 </div>
               </div>
@@ -662,45 +585,31 @@
               <table class="kt-table-auto">
                 <tbody>
                   <tr>
-                    <td class="text-sm text-secondary-foreground pb-3.5 pe-3">
-                      Age
-                    </td>
+                    <td class="text-sm text-secondary-foreground pb-3.5 pe-3">Age</td>
                     <td class="text-sm text-mono pb-3.5">32</td>
                   </tr>
                   <tr>
-                    <td class="text-sm text-secondary-foreground pb-3.5 pe-3">
-                      City:
-                    </td>
+                    <td class="text-sm text-secondary-foreground pb-3.5 pe-3">City:</td>
                     <td class="text-sm text-mono pb-3.5">Amsterdam</td>
                   </tr>
                   <tr>
-                    <td class="text-sm text-secondary-foreground pb-3.5 pe-3">
-                      State:
-                    </td>
+                    <td class="text-sm text-secondary-foreground pb-3.5 pe-3">State:</td>
                     <td class="text-sm text-mono pb-3.5">North Holland</td>
                   </tr>
                   <tr>
-                    <td class="text-sm text-secondary-foreground pb-3.5 pe-3">
-                      Country:
-                    </td>
+                    <td class="text-sm text-secondary-foreground pb-3.5 pe-3">Country:</td>
                     <td class="text-sm text-mono pb-3.5">Netherlands</td>
                   </tr>
                   <tr>
-                    <td class="text-sm text-secondary-foreground pb-3.5 pe-3">
-                      Postcode:
-                    </td>
+                    <td class="text-sm text-secondary-foreground pb-3.5 pe-3">Postcode:</td>
                     <td class="text-sm text-mono pb-3.5">1092 NL</td>
                   </tr>
                   <tr>
-                    <td class="text-sm text-secondary-foreground pb-3.5 pe-3">
-                      Phone:
-                    </td>
+                    <td class="text-sm text-secondary-foreground pb-3.5 pe-3">Phone:</td>
                     <td class="text-sm text-mono pb-3.5">+31 6 1234 56 78</td>
                   </tr>
                   <tr>
-                    <td class="text-sm text-secondary-foreground pb-3.5 pe-3">
-                      Email:
-                    </td>
+                    <td class="text-sm text-secondary-foreground pb-3.5 pe-3">Email:</td>
                     <td class="text-sm text-mono pb-3.5">
                       <a class="text-foreground hover:text-primary" href="#">
                         jenny@ktstudio.com
@@ -726,19 +635,13 @@
                     >
                       Esprito Studios
                     </a>
-                    <span class="text-sm font-medium text-mono">
-                      Senior Project Manager
-                    </span>
-                    <span
-                      class="text-xs text-secondary-foreground leading-none"
-                    >
+                    <span class="text-sm font-medium text-mono"> Senior Project Manager </span>
+                    <span class="text-xs text-secondary-foreground leading-none">
                       2019 - Present
                     </span>
                   </div>
                 </div>
-                <div
-                  class="text-secondary-foreground font-semibold text-sm leading-none"
-                >
+                <div class="text-secondary-foreground font-semibold text-sm leading-none">
                   Previous Jobs
                 </div>
                 <div class="flex align-start gap-3.5">
@@ -750,22 +653,14 @@
                     >
                       Pesto Plus
                     </a>
-                    <span class="text-sm font-medium text-mono">
-                      CRM Product Lead
-                    </span>
-                    <span
-                      class="text-xs text-secondary-foreground leading-none"
-                    >
+                    <span class="text-sm font-medium text-mono"> CRM Product Lead </span>
+                    <span class="text-xs text-secondary-foreground leading-none">
                       2012 - 2019
                     </span>
                   </div>
                 </div>
                 <div class="flex align-start gap-3.5">
-                  <img
-                    alt=""
-                    class="h-9"
-                    src="/media/brand-logos/perrier.svg"
-                  />
+                  <img alt="" class="h-9" src="/media/brand-logos/perrier.svg" />
                   <div class="flex flex-col gap-1">
                     <a
                       class="text-sm font-medium text-primary leading-none hover:text-primary"
@@ -773,12 +668,8 @@
                     >
                       Perrier Technologies
                     </a>
-                    <span class="text-sm font-medium text-mono">
-                      UX Research
-                    </span>
-                    <span
-                      class="text-xs text-secondary-foreground leading-none"
-                    >
+                    <span class="text-sm font-medium text-mono"> UX Research </span>
+                    <span class="text-xs text-secondary-foreground leading-none">
                       2010 - 2012
                     </span>
                   </div>
@@ -786,11 +677,7 @@
               </div>
             </div>
             <div class="kt-card-footer justify-center">
-              <a
-                @click.prevent
-                class="kt-link kt-link-underlined kt-link-dashed"
-                href="#"
-              >
+              <a @click.prevent class="kt-link kt-link-underlined kt-link-dashed" href="#">
                 Open to Work
               </a>
             </div>
@@ -804,9 +691,7 @@
                 <span class="kt-badge kt-badge-outline"> Web Design </span>
                 <span class="kt-badge kt-badge-outline"> Code Review </span>
                 <span class="kt-badge kt-badge-outline"> Figma </span>
-                <span class="kt-badge kt-badge-outline">
-                  Product Development
-                </span>
+                <span class="kt-badge kt-badge-outline"> Product Development </span>
                 <span class="kt-badge kt-badge-outline"> Webflow </span>
                 <span class="kt-badge kt-badge-outline"> AI </span>
                 <span class="kt-badge kt-badge-outline"> noCode </span>
@@ -826,9 +711,7 @@
                   data-kt-menu-item-toggle="dropdown"
                   data-kt-menu-item-trigger="click"
                 >
-                  <button
-                    class="kt-menu-toggle kt-btn kt-btn-sm kt-btn-icon kt-btn-ghost"
-                  >
+                  <button class="kt-menu-toggle kt-btn kt-btn-sm kt-btn-icon kt-btn-ghost">
                     <i class="ki-filled ki-dots-vertical text-lg"> </i>
                   </button>
                   <div
@@ -844,11 +727,7 @@
                       </a>
                     </div>
                     <div class="kt-menu-item">
-                      <a
-                        class="kt-menu-link"
-                        data-kt-modal-toggle="#share_profile_modal"
-                        href="#"
-                      >
+                      <a class="kt-menu-link" data-kt-modal-toggle="#share_profile_modal" href="#">
                         <span class="kt-menu-icon">
                           <i class="ki-filled ki-share"> </i>
                         </span>
@@ -868,15 +747,10 @@
                         </span>
                         <span class="kt-menu-title"> Notifications </span>
                         <span class="kt-menu-arrow">
-                          <i
-                            class="ki-filled ki-right text-xs rtl:transform rtl:rotate-180"
-                          >
-                          </i>
+                          <i class="ki-filled ki-right text-xs rtl:transform rtl:rotate-180"> </i>
                         </span>
                       </div>
-                      <div
-                        class="kt-menu-dropdown kt-menu-default w-full max-w-[175px]"
-                      >
+                      <div class="kt-menu-dropdown kt-menu-default w-full max-w-[175px]">
                         <div class="kt-menu-item">
                           <a @click.prevent class="kt-menu-link" href="#">
                             <span class="kt-menu-icon">
@@ -904,11 +778,7 @@
                       </div>
                     </div>
                     <div class="kt-menu-item">
-                      <a
-                        class="kt-menu-link"
-                        data-kt-modal-toggle="#report_user_modal"
-                        href="#"
-                      >
+                      <a class="kt-menu-link" data-kt-modal-toggle="#report_user_modal" href="#">
                         <span class="kt-menu-icon">
                           <i class="ki-filled ki-dislike"> </i>
                         </span>
@@ -953,9 +823,7 @@
                       data-kt-menu-item-toggle="dropdown"
                       data-kt-menu-item-trigger="click"
                     >
-                      <button
-                        class="kt-menu-toggle kt-btn kt-btn-sm kt-btn-icon kt-btn-ghost"
-                      >
+                      <button class="kt-menu-toggle kt-btn kt-btn-sm kt-btn-icon kt-btn-ghost">
                         <i class="ki-filled ki-dots-vertical text-lg"> </i>
                       </button>
                       <div
@@ -1017,9 +885,7 @@
                       data-kt-menu-item-toggle="dropdown"
                       data-kt-menu-item-trigger="click"
                     >
-                      <button
-                        class="kt-menu-toggle kt-btn kt-btn-sm kt-btn-icon kt-btn-ghost"
-                      >
+                      <button class="kt-menu-toggle kt-btn kt-btn-sm kt-btn-icon kt-btn-ghost">
                         <i class="ki-filled ki-dots-vertical text-lg"> </i>
                       </button>
                       <div
@@ -1081,9 +947,7 @@
                       data-kt-menu-item-toggle="dropdown"
                       data-kt-menu-item-trigger="click"
                     >
-                      <button
-                        class="kt-menu-toggle kt-btn kt-btn-sm kt-btn-icon kt-btn-ghost"
-                      >
+                      <button class="kt-menu-toggle kt-btn kt-btn-sm kt-btn-icon kt-btn-ghost">
                         <i class="ki-filled ki-dots-vertical text-lg"> </i>
                       </button>
                       <div
@@ -1145,9 +1009,7 @@
                       data-kt-menu-item-toggle="dropdown"
                       data-kt-menu-item-trigger="click"
                     >
-                      <button
-                        class="kt-menu-toggle kt-btn kt-btn-sm kt-btn-icon kt-btn-ghost"
-                      >
+                      <button class="kt-menu-toggle kt-btn kt-btn-sm kt-btn-icon kt-btn-ghost">
                         <i class="ki-filled ki-dots-vertical text-lg"> </i>
                       </button>
                       <div
@@ -1189,11 +1051,7 @@
               </div>
             </div>
             <div class="kt-card-footer justify-center">
-              <a
-                @click.prevent
-                class="kt-link kt-link-underlined kt-link-dashed"
-                href="#"
-              >
+              <a @click.prevent class="kt-link kt-link-underlined kt-link-dashed" href="#">
                 All Files
               </a>
             </div>
@@ -1205,9 +1063,7 @@
           <div class="flex flex-col gap-5 lg:gap-7.5">
             <div class="kt-card">
               <div class="kt-card-content px-10 py-7.5 lg:pe-12.5">
-                <div
-                  class="flex flex-wrap md:flex-nowrap items-center gap-6 md:gap-10"
-                >
+                <div class="flex flex-wrap md:flex-nowrap items-center gap-6 md:gap-10">
                   <div class="flex flex-col gap-3">
                     <h2 class="text-xl font-semibold text-mono">
                       Unlock Creative
@@ -1215,9 +1071,9 @@
                       Partnerships on Our Blog
                     </h2>
                     <p class="text-sm text-secondary-foreground leading-5.5">
-                      Explore exciting collaboration opportunities with our
-                      blog. We're open to partnerships, guest posts, and more.
-                      Join us to share your insights and grow your audience.
+                      Explore exciting collaboration opportunities with our blog. We're open to
+                      partnerships, guest posts, and more. Join us to share your insights and grow
+                      your audience.
                     </p>
                   </div>
                   <img
@@ -1233,11 +1089,7 @@
                 </div>
               </div>
               <div class="kt-card-footer justify-center">
-                <a
-                  @click.prevent
-                  class="kt-link kt-link-underlined kt-link-dashed"
-                  href="#"
-                >
+                <a @click.prevent class="kt-link kt-link-underlined kt-link-dashed" href="#">
                   Get Started
                 </a>
               </div>
@@ -1254,9 +1106,7 @@
                     data-kt-menu-item-toggle="dropdown"
                     data-kt-menu-item-trigger="click"
                   >
-                    <button
-                      class="kt-menu-toggle kt-btn kt-btn-sm kt-btn-icon kt-btn-ghost"
-                    >
+                    <button class="kt-menu-toggle kt-btn kt-btn-sm kt-btn-icon kt-btn-ghost">
                       <i class="ki-filled ki-dots-vertical text-lg"> </i>
                     </button>
                     <div
@@ -1288,11 +1138,7 @@
                         </a>
                       </div>
                       <div class="kt-menu-item">
-                        <a
-                          class="kt-menu-link"
-                          data-kt-modal-toggle="#report_user_modal"
-                          href="#"
-                        >
+                        <a class="kt-menu-link" data-kt-modal-toggle="#report_user_modal" href="#">
                           <span class="kt-menu-icon">
                             <i class="ki-filled ki-dislike"> </i>
                           </span>
@@ -1321,9 +1167,7 @@
                     data-kt-menu-item-toggle="dropdown"
                     data-kt-menu-item-trigger="click"
                   >
-                    <button
-                      class="kt-menu-toggle kt-btn kt-btn-sm kt-btn-icon kt-btn-ghost"
-                    >
+                    <button class="kt-menu-toggle kt-btn kt-btn-sm kt-btn-icon kt-btn-ghost">
                       <i class="ki-filled ki-dots-vertical text-lg"> </i>
                     </button>
                     <div
@@ -1363,15 +1207,10 @@
                           </span>
                           <span class="kt-menu-title"> Notifications </span>
                           <span class="kt-menu-arrow">
-                            <i
-                              class="ki-filled ki-right text-xs rtl:transform rtl:rotate-180"
-                            >
-                            </i>
+                            <i class="ki-filled ki-right text-xs rtl:transform rtl:rotate-180"> </i>
                           </span>
                         </div>
-                        <div
-                          class="kt-menu-dropdown kt-menu-default w-full max-w-[175px]"
-                        >
+                        <div class="kt-menu-dropdown kt-menu-default w-full max-w-[175px]">
                           <div class="kt-menu-item">
                             <a @click.prevent class="kt-menu-link" href="#">
                               <span class="kt-menu-icon">
@@ -1391,8 +1230,7 @@
                           <div class="kt-menu-item">
                             <a @click.prevent class="kt-menu-link" href="#">
                               <span class="kt-menu-icon">
-                                <i class="ki-filled ki-notification-status">
-                                </i>
+                                <i class="ki-filled ki-notification-status"> </i>
                               </span>
                               <span class="kt-menu-title"> Push </span>
                             </a>
@@ -1400,11 +1238,7 @@
                         </div>
                       </div>
                       <div class="kt-menu-item">
-                        <a
-                          class="kt-menu-link"
-                          data-kt-modal-toggle="#report_user_modal"
-                          href="#"
-                        >
+                        <a class="kt-menu-link" data-kt-modal-toggle="#report_user_modal" href="#">
                           <span class="kt-menu-icon">
                             <i class="ki-filled ki-dislike"> </i>
                           </span>
@@ -1440,9 +1274,7 @@
                         >
                           Tyler Hero
                         </a>
-                        <span
-                          class="text-xs font-semibold text-secondary-foreground"
-                        >
+                        <span class="text-xs font-semibold text-secondary-foreground">
                           6 contributors
                         </span>
                       </div>
@@ -1456,9 +1288,7 @@
                         data-kt-menu-item-toggle="dropdown"
                         data-kt-menu-item-trigger="click"
                       >
-                        <button
-                          class="kt-menu-toggle kt-btn kt-btn-sm kt-btn-icon kt-btn-ghost"
-                        >
+                        <button class="kt-menu-toggle kt-btn kt-btn-sm kt-btn-icon kt-btn-ghost">
                           <i class="ki-filled ki-dots-vertical text-lg"> </i>
                         </button>
                         <div
@@ -1511,9 +1341,7 @@
                         >
                           Esther Howard
                         </a>
-                        <span
-                          class="text-xs font-semibold text-secondary-foreground"
-                        >
+                        <span class="text-xs font-semibold text-secondary-foreground">
                           29 contributors
                         </span>
                       </div>
@@ -1527,9 +1355,7 @@
                         data-kt-menu-item-toggle="dropdown"
                         data-kt-menu-item-trigger="click"
                       >
-                        <button
-                          class="kt-menu-toggle kt-btn kt-btn-sm kt-btn-icon kt-btn-ghost"
-                        >
+                        <button class="kt-menu-toggle kt-btn kt-btn-sm kt-btn-icon kt-btn-ghost">
                           <i class="ki-filled ki-dots-vertical text-lg"> </i>
                         </button>
                         <div
@@ -1582,9 +1408,7 @@
                         >
                           Cody Fisher
                         </a>
-                        <span
-                          class="text-xs font-semibold text-secondary-foreground"
-                        >
+                        <span class="text-xs font-semibold text-secondary-foreground">
                           34 contributors
                         </span>
                       </div>
@@ -1598,9 +1422,7 @@
                         data-kt-menu-item-toggle="dropdown"
                         data-kt-menu-item-trigger="click"
                       >
-                        <button
-                          class="kt-menu-toggle kt-btn kt-btn-sm kt-btn-icon kt-btn-ghost"
-                        >
+                        <button class="kt-menu-toggle kt-btn kt-btn-sm kt-btn-icon kt-btn-ghost">
                           <i class="ki-filled ki-dots-vertical text-lg"> </i>
                         </button>
                         <div
@@ -1653,9 +1475,7 @@
                         >
                           Arlene McCoy
                         </a>
-                        <span
-                          class="text-xs font-semibold text-secondary-foreground"
-                        >
+                        <span class="text-xs font-semibold text-secondary-foreground">
                           1 contributors
                         </span>
                       </div>
@@ -1669,9 +1489,7 @@
                         data-kt-menu-item-toggle="dropdown"
                         data-kt-menu-item-trigger="click"
                       >
-                        <button
-                          class="kt-menu-toggle kt-btn kt-btn-sm kt-btn-icon kt-btn-ghost"
-                        >
+                        <button class="kt-menu-toggle kt-btn kt-btn-sm kt-btn-icon kt-btn-ghost">
                           <i class="ki-filled ki-dots-vertical text-lg"> </i>
                         </button>
                         <div
@@ -1713,11 +1531,7 @@
                 </div>
               </div>
               <div class="kt-card-footer justify-center">
-                <a
-                  @click.prevent
-                  class="kt-link kt-link-underlined kt-link-dashed"
-                  href="#"
-                >
+                <a @click.prevent class="kt-link kt-link-underlined kt-link-dashed" href="#">
                   All Contributors
                 </a>
               </div>
@@ -1734,9 +1548,7 @@
                     data-kt-menu-item-toggle="dropdown"
                     data-kt-menu-item-trigger="click"
                   >
-                    <button
-                      class="kt-menu-toggle kt-btn kt-btn-sm kt-btn-icon kt-btn-ghost"
-                    >
+                    <button class="kt-menu-toggle kt-btn kt-btn-sm kt-btn-icon kt-btn-ghost">
                       <i class="ki-filled ki-dots-vertical text-lg"> </i>
                     </button>
                     <div
@@ -1768,11 +1580,7 @@
                         </a>
                       </div>
                       <div class="kt-menu-item">
-                        <a
-                          class="kt-menu-link"
-                          data-kt-modal-toggle="#report_user_modal"
-                          href="#"
-                        >
+                        <a class="kt-menu-link" data-kt-modal-toggle="#report_user_modal" href="#">
                           <span class="kt-menu-icon">
                             <i class="ki-filled ki-dislike"> </i>
                           </span>
@@ -1783,9 +1591,7 @@
                   </div>
                 </div>
               </div>
-              <div
-                class="kt-card-content flex justify-center items-center px-3 py-1"
-              >
+              <div class="kt-card-content flex justify-center items-center px-3 py-1">
                 <div id="contributions_chart"></div>
               </div>
             </div>
@@ -1803,9 +1609,7 @@
                   data-kt-menu-item-toggle="dropdown"
                   data-kt-menu-item-trigger="click"
                 >
-                  <button
-                    class="kt-menu-toggle kt-btn kt-btn-sm kt-btn-icon kt-btn-ghost"
-                  >
+                  <button class="kt-menu-toggle kt-btn kt-btn-sm kt-btn-icon kt-btn-ghost">
                     <i class="ki-filled ki-dots-vertical text-lg"> </i>
                   </button>
                   <div
@@ -1841,15 +1645,10 @@
                         </span>
                         <span class="kt-menu-title"> Export </span>
                         <span class="kt-menu-arrow">
-                          <i
-                            class="ki-filled ki-right text-xs rtl:transform rtl:rotate-180"
-                          >
-                          </i>
+                          <i class="ki-filled ki-right text-xs rtl:transform rtl:rotate-180"> </i>
                         </span>
                       </div>
-                      <div
-                        class="kt-menu-dropdown kt-menu-default w-full max-w-[125px]"
-                      >
+                      <div class="kt-menu-dropdown kt-menu-default w-full max-w-[125px]">
                         <div class="kt-menu-item">
                           <a @click.prevent class="kt-menu-link" href="#">
                             <span class="kt-menu-title"> PDF </span>
@@ -1893,19 +1692,13 @@
                 <tbody>
                   <tr>
                     <td class="text-start">
-                      <a
-                        class="text-sm font-medium text-mono hover:text-primary"
-                        href="#"
-                      >
+                      <a class="text-sm font-medium text-mono hover:text-primary" href="#">
                         Acme software development
                       </a>
                     </td>
                     <td>
                       <div class="kt-progress kt-progress-primary h-[4px]">
-                        <div
-                          class="kt-progress-indicator"
-                          style="width: 60%"
-                        ></div>
+                        <div class="kt-progress-indicator" style="width: 60%"></div>
                       </div>
                     </td>
                     <td>
@@ -1939,9 +1732,7 @@
                         </div>
                       </div>
                     </td>
-                    <td
-                      class="text-sm font-medium text-secondary-foreground text-end"
-                    >
+                    <td class="text-sm font-medium text-secondary-foreground text-end">
                       24 Aug, 2024
                     </td>
                     <td class="text-start">
@@ -1954,9 +1745,7 @@
                           data-kt-menu-item-toggle="dropdown"
                           data-kt-menu-item-trigger="click"
                         >
-                          <button
-                            class="kt-menu-toggle kt-btn kt-btn-sm kt-btn-icon kt-btn-ghost"
-                          >
+                          <button class="kt-menu-toggle kt-btn kt-btn-sm kt-btn-icon kt-btn-ghost">
                             <i class="ki-filled ki-dots-vertical text-lg"> </i>
                           </button>
                           <div
@@ -2012,19 +1801,13 @@
                   </tr>
                   <tr>
                     <td class="text-start">
-                      <a
-                        class="text-sm font-medium text-mono hover:text-primary"
-                        href="#"
-                      >
+                      <a class="text-sm font-medium text-mono hover:text-primary" href="#">
                         Strategic Partnership Deal
                       </a>
                     </td>
                     <td>
                       <div class="kt-progress h-[4px]">
-                        <div
-                          class="kt-progress-indicator"
-                          style="width: 100%"
-                        ></div>
+                        <div class="kt-progress-indicator" style="width: 100%"></div>
                       </div>
                     </td>
                     <td>
@@ -2052,9 +1835,7 @@
                         </div>
                       </div>
                     </td>
-                    <td
-                      class="text-sm font-medium text-secondary-foreground text-end"
-                    >
+                    <td class="text-sm font-medium text-secondary-foreground text-end">
                       10 Sep, 2024
                     </td>
                     <td class="text-start">
@@ -2067,9 +1848,7 @@
                           data-kt-menu-item-toggle="dropdown"
                           data-kt-menu-item-trigger="click"
                         >
-                          <button
-                            class="kt-menu-toggle kt-btn kt-btn-sm kt-btn-icon kt-btn-ghost"
-                          >
+                          <button class="kt-menu-toggle kt-btn kt-btn-sm kt-btn-icon kt-btn-ghost">
                             <i class="ki-filled ki-dots-vertical text-lg"> </i>
                           </button>
                           <div
@@ -2125,19 +1904,13 @@
                   </tr>
                   <tr>
                     <td class="text-start">
-                      <a
-                        class="text-sm font-medium text-mono hover:text-primary"
-                        href="#"
-                      >
+                      <a class="text-sm font-medium text-mono hover:text-primary" href="#">
                         Client Onboarding
                       </a>
                     </td>
                     <td>
                       <div class="kt-progress kt-progress-primary h-[4px]">
-                        <div
-                          class="kt-progress-indicator"
-                          style="width: 20%"
-                        ></div>
+                        <div class="kt-progress-indicator" style="width: 20%"></div>
                       </div>
                     </td>
                     <td>
@@ -2158,9 +1931,7 @@
                         </div>
                       </div>
                     </td>
-                    <td
-                      class="text-sm font-medium text-secondary-foreground text-end"
-                    >
+                    <td class="text-sm font-medium text-secondary-foreground text-end">
                       19 Sep, 2024
                     </td>
                     <td class="text-start">
@@ -2173,9 +1944,7 @@
                           data-kt-menu-item-toggle="dropdown"
                           data-kt-menu-item-trigger="click"
                         >
-                          <button
-                            class="kt-menu-toggle kt-btn kt-btn-sm kt-btn-icon kt-btn-ghost"
-                          >
+                          <button class="kt-menu-toggle kt-btn kt-btn-sm kt-btn-icon kt-btn-ghost">
                             <i class="ki-filled ki-dots-vertical text-lg"> </i>
                           </button>
                           <div
@@ -2231,19 +2000,13 @@
                   </tr>
                   <tr>
                     <td class="text-start">
-                      <a
-                        class="text-sm font-medium text-mono hover:text-primary"
-                        href="#"
-                      >
+                      <a class="text-sm font-medium text-mono hover:text-primary" href="#">
                         Widget Supply Agreement
                       </a>
                     </td>
                     <td>
                       <div class="kt-progress kt-progress-success h-[4px]">
-                        <div
-                          class="kt-progress-indicator"
-                          style="width: 100%"
-                        ></div>
+                        <div class="kt-progress-indicator" style="width: 100%"></div>
                       </div>
                     </td>
                     <td>
@@ -2277,9 +2040,7 @@
                         </div>
                       </div>
                     </td>
-                    <td
-                      class="text-sm font-medium text-secondary-foreground text-end"
-                    >
+                    <td class="text-sm font-medium text-secondary-foreground text-end">
                       5 May, 2024
                     </td>
                     <td class="text-start">
@@ -2292,9 +2053,7 @@
                           data-kt-menu-item-toggle="dropdown"
                           data-kt-menu-item-trigger="click"
                         >
-                          <button
-                            class="kt-menu-toggle kt-btn kt-btn-sm kt-btn-icon kt-btn-ghost"
-                          >
+                          <button class="kt-menu-toggle kt-btn kt-btn-sm kt-btn-icon kt-btn-ghost">
                             <i class="ki-filled ki-dots-vertical text-lg"> </i>
                           </button>
                           <div
@@ -2350,19 +2109,13 @@
                   </tr>
                   <tr>
                     <td class="text-start">
-                      <a
-                        class="text-sm font-medium text-mono hover:text-primary"
-                        href="#"
-                      >
+                      <a class="text-sm font-medium text-mono hover:text-primary" href="#">
                         Project X Redesign
                       </a>
                     </td>
                     <td>
                       <div class="kt-progress kt-progress-primary h-[4px]">
-                        <div
-                          class="kt-progress-indicator"
-                          style="width: 80%"
-                        ></div>
+                        <div class="kt-progress-indicator" style="width: 80%"></div>
                       </div>
                     </td>
                     <td>
@@ -2396,9 +2149,7 @@
                         </div>
                       </div>
                     </td>
-                    <td
-                      class="text-sm font-medium text-secondary-foreground text-end"
-                    >
+                    <td class="text-sm font-medium text-secondary-foreground text-end">
                       1 Feb, 2025
                     </td>
                     <td class="text-start">
@@ -2411,9 +2162,7 @@
                           data-kt-menu-item-toggle="dropdown"
                           data-kt-menu-item-trigger="click"
                         >
-                          <button
-                            class="kt-menu-toggle kt-btn kt-btn-sm kt-btn-icon kt-btn-ghost"
-                          >
+                          <button class="kt-menu-toggle kt-btn kt-btn-sm kt-btn-icon kt-btn-ghost">
                             <i class="ki-filled ki-dots-vertical text-lg"> </i>
                           </button>
                           <div
@@ -2471,11 +2220,7 @@
               </table>
             </div>
             <div class="kt-card-footer justify-center">
-              <a
-                @click.prevent
-                class="kt-link kt-link-underlined kt-link-dashed"
-                href="#"
-              >
+              <a @click.prevent class="kt-link kt-link-underlined kt-link-dashed" href="#">
                 All Projects
               </a>
             </div>
@@ -2491,9 +2236,9 @@
 
 <style scoped>
 .hero-bg {
-  background-image: url("/media/images/2600x1200/bg-1.png");
+  background-image: url('/media/images/2600x1200/bg-1.png');
 }
 .dark .hero-bg {
-  background-image: url("/media/images/2600x1200/bg-1-dark.png");
+  background-image: url('/media/images/2600x1200/bg-1-dark.png');
 }
 </style>

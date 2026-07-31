@@ -24,10 +24,10 @@ const isMyAccountActive = computed(() => route.path.startsWith("/account"));
   >
     <!-- Sidebar Header -->
     <div class="flex flex-col gap-2.5" id="sidebar_header">
-      <div class="flex items-center gap-2.5 px-3.5 h-[70px]">
+      <div class="flex items-center gap-2.5 px-3.5 h-17.5">
         <RouterLink to="/">
           <img
-            class="size-[34px]"
+            class="size-8.5"
             src="/media/app/mini-logo-circle-success.svg"
           />
         </RouterLink>
@@ -94,7 +94,7 @@ const isMyAccountActive = computed(() => route.path.startsWith("/account"));
       <div class="flex items-center gap-2.5 px-3.5">
         <!-- Input -->
         <a
-          class="kt-btn kt-btn-secondary text-white [&_i]:text-white justify-center min-w-[198px]"
+          class="kt-btn kt-btn-secondary text-white [&_i]:text-white justify-center min-w-49.5"
           href="#"
           @click.prevent
         >

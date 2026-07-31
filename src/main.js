@@ -1,8 +1,8 @@
 import { createApp } from 'vue'
-import App from './App.vue'
-import router from './router'
-import './assets/main.css'
-import { initializeTheme, loadMetronicScripts } from './utils/metronic.js'
+import App from '@/App.vue'
+import router from '@/router'
+import '@/assets/main.css'
+import { initializeTheme, loadMetronicScripts } from '@/utils/metronic'
 
 initializeTheme()
 
@@ -18,4 +18,3 @@ router.isReady().then(async () => {
     console.error('No se pudieron inicializar completamente los scripts de Metronic:', error)
   }
 })
-//

@@ -1,11 +1,6 @@
 import { createRouter, createWebHistory } from 'vue-router'
-import DefaultLayout from '../layouts/DefaultLayout.vue'
-import DashboardView from '../views/DashboardView.vue'
-
-import PublicProfileDefaultView from '../modules/public-profile/PublicProfileDefaultView.vue'
-import IntegrationsView from '../modules/account/IntegrationsView.vue'
-
-import { reinitializeMetronic } from '../utils/metronic'
+import DefaultLayout from '@/layouts/DefaultLayout.vue'
+import { reinitializeMetronic } from '@/utils/metronic'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -17,13 +12,13 @@ const router = createRouter({
         {
           path: '',
           name: 'dashboard',
-          component: DashboardView,
+          component: () => import('@/views/DashboardView.vue'),
           meta: { title: 'Dashboard' },
         },
         {
           path: 'public-profile/profiles/default',
           name: 'public-profile-default',
-          component: PublicProfileDefaultView,
+          component: () => import('@/views/public-profile/PublicProfileDefaultView.vue'),
           meta: {
             title: 'Default',
           },
@@ -31,7 +26,7 @@ const router = createRouter({
         {
           path: 'account/integrations',
           name: 'account-integrations',
-          component: IntegrationsView,
+          component: () => import('@/views/account/IntegrationsView.vue'),
           meta: {
             title: 'Integrations',
           },
@@ -50,4 +45,3 @@ router.afterEach((to) => {
 })
 
 export default router
-//
