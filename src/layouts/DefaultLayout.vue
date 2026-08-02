@@ -7,7 +7,7 @@ import AppModals from '@/components/layout/AppModals.vue'
 
 <template>
   <!-- Base general que se reutiliza en todos los módulos internos -->
-  <div class="demo1 flex min-h-screen grow">
+  <div class="flex min-h-screen grow">
     <AppHeader />
 
     <div class="flex flex-col lg:flex-row grow pt-(--header-height) lg:pt-0">

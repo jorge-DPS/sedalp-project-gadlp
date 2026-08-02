@@ -16,15 +16,10 @@ const isMyAccountActive = computed(() => route.path.startsWith("/account"));
 </script>
 
 <template>
-  <div
-    class="flex-col fixed top-0 bottom-0 z-20 hidden lg:flex items-stretch shrink-0 w-(--sidebar-width) bg-background text-foreground dark [--kt-drawer-enable:true] lg:[--kt-drawer-enable:false]"
-    data-kt-drawer="true"
-    data-kt-drawer-class="kt-drawer kt-drawer-start flex top-0 bottom-0"
-    id="sidebar"
-  >
+  <div class="flex-col fixed top-0 bottom-0 z-20 hidden lg:flex items-stretch shrink-0 w-(--sidebar-width) dark [--kt-drawer-enable:true] lg:[--kt-drawer-enable:false]" data-kt-drawer="true" data-kt-drawer-class="kt-drawer kt-drawer-start flex top-0 bottom-0" id="sidebar">
     <!-- Sidebar Header -->
     <div class="flex flex-col gap-2.5" id="sidebar_header">
-      <div class="flex items-center gap-2.5 px-3.5 h-17.5">
+      <div class="flex items-center gap-2.5 px-3.5 h-[70px]">
         <RouterLink to="/">
           <img
             class="size-8.5"
