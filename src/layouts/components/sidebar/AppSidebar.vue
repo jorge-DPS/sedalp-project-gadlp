@@ -1,30 +1,57 @@
 <script setup>
-import { computed } from "vue";
-import { useRoute } from "vue-router";
+import { authService } from '@/modules/auth/services/authService'
+import { tokenService } from '@/modules/auth/services/tokenService'
+import { computed, ref } from 'vue'
+import { useRoute, useRouter } from 'vue-router'
 
-const route = useRoute();
 
-const isPublicProfileActive = computed(() =>
-  route.path.startsWith("/public-profile"),
-);
 
-const isProfilesActive = computed(() =>
-  route.path.startsWith("/public-profile/profiles"),
-);
+const route = useRoute()
+const router = useRouter()
 
-const isMyAccountActive = computed(() => route.path.startsWith("/account"));
+const loggingOut = ref(false)
+
+const handleLogout = async () => {
+  if (loggingOut.value) {
+    return
+  }
+
+  loggingOut.value = true
+
+  try {
+    await authService.logout()
+  } catch (error) {
+    console.error('Error al cerrar sesión:', error)
+  } finally {
+    tokenService.clear()
+
+    await router.replace({
+      name: 'login',
+    })
+
+    loggingOut.value = false
+  }
+}
+
+const isPublicProfileActive = computed(() => route.path.startsWith('/public-profile'))
+
+const isProfilesActive = computed(() => route.path.startsWith('/public-profile/profiles'))
+
+// const isMyAccountActive = computed(() => route.path.startsWith("/account"));
 </script>
 
 <template>
-  <div class="flex-col fixed top-0 bottom-0 z-20 hidden lg:flex items-stretch shrink-0 w-(--sidebar-width) dark [--kt-drawer-enable:true] lg:[--kt-drawer-enable:false]" data-kt-drawer="true" data-kt-drawer-class="kt-drawer kt-drawer-start flex top-0 bottom-0" id="sidebar">
+  <div
+    class="flex-col fixed top-0 bottom-0 z-20 hidden lg:flex items-stretch shrink-0 w-(--sidebar-width) dark [--kt-drawer-enable:true] lg:[--kt-drawer-enable:false]"
+    data-kt-drawer="true"
+    data-kt-drawer-class="kt-drawer kt-drawer-start flex top-0 bottom-0"
+    id="sidebar"
+  >
     <!-- Sidebar Header -->
     <div class="flex flex-col gap-2.5" id="sidebar_header">
       <div class="flex items-center gap-2.5 px-3.5 h-[70px]">
         <RouterLink to="/">
-          <img
-            class="size-8.5"
-            src="/media/app/mini-logo-circle-success.svg"
-          />
+          <img class="size-8.5" src="/media/app/mini-logo-circle-success.svg" />
         </RouterLink>
         <div class="kt-menu kt-menu-default grow" data-kt-menu="true">
           <div
@@ -34,12 +61,8 @@ const isMyAccountActive = computed(() => route.path.startsWith("/account"));
             data-kt-menu-item-toggle="dropdown"
             data-kt-menu-item-trigger="hover"
           >
-            <div
-              class="kt-menu-label cursor-pointer text-mono font-medium grow justify-between"
-            >
-              <span class="text-lg font-medium text-inverse grow">
-                Metronic
-              </span>
+            <div class="kt-menu-label cursor-pointer text-mono font-medium grow justify-between">
+              <span class="text-lg font-medium text-inverse grow"> Metronic </span>
               <div class="flex flex-col text-mono font-medium">
                 <span class="kt-menu-arrow">
                   <i class="ki-filled ki-up"> </i>
@@ -107,10 +130,7 @@ const isMyAccountActive = computed(() => route.path.startsWith("/account"));
     </div>
     <!-- End of Sidebar Header -->
     <!-- Sidebar menu -->
-    <div
-      class="flex items-stretch grow shrink-0 justify-center my-5"
-      id="sidebar_menu"
-    >
+    <div class="flex items-stretch grow shrink-0 justify-center my-5" id="sidebar_menu">
       <div
         class="kt-scrollable-y-auto grow"
         data-kt-scrollable="true"
@@ -121,21 +141,14 @@ const isMyAccountActive = computed(() => route.path.startsWith("/account"));
       >
         <!-- Primary Menu -->
         <div class="mb-5">
-          <h3
-            class="text-sm text-muted-foreground uppercase ps-5 inline-block mb-3"
-          >
-            Pages
-          </h3>
+          <h3 class="text-sm text-muted-foreground uppercase ps-5 inline-block mb-3">Menu</h3>
           <div
             class="kt-menu flex flex-col w-full gap-1.5 px-3.5"
             data-kt-menu="true"
             data-kt-menu-accordion-expand-all="false"
             id="sidebar_primary_menu"
           >
-            <div
-              class="kt-menu-item"
-              :class="{ active: route.name === 'dashboard' }"
-            >
+            <div class="kt-menu-item" :class="{ active: route.name === 'dashboard' }">
               <RouterLink
                 :to="{ name: 'dashboard' }"
                 class="kt-menu-link gap-2.5 py-2 px-2.5 kt-menu-item-active:bg-secondary kt-menu-link-hover:bg-secondary"
@@ -149,47 +162,49 @@ const isMyAccountActive = computed(() => route.path.startsWith("/account"));
                 <span
                   class="kt-menu-title text-sm text-foreground kt-menu-item-active:font-medium kt-menu-item-active:text-mono kt-menu-link-hover:text-mono"
                 >
-                  Overview
+                  Administración
                 </span>
               </RouterLink>
             </div>
 
             <!-- Access Control -->
-            <div class="pt-4 pb-1 px-2.5">
+            <!-- <div class="pt-4 pb-1 px-2.5">
               <span class="text-xs font-semibold uppercase text-muted-foreground">
-                Seguridad
+                Administración
               </span>
-            </div>
+            </div> -->
 
-            <div
-              class="kt-menu-item"
-              :class="{ active: route.name === 'user-management' }"
-            >
+            <div class="kt-menu-item" :class="{ active: route.name === 'users.index' }">
               <RouterLink
-                :to="{ name: 'user-management' }"
+                :to="{ name: 'users.index' }"
                 class="kt-menu-link gap-2.5 py-2 px-2.5 kt-menu-item-active:bg-secondary kt-menu-link-hover:bg-secondary"
               >
-                <span class="kt-menu-icon items-start text-muted-foreground text-lg kt-menu-item-active:text-mono kt-menu-link-hover:text-mono">
+                <span
+                  class="kt-menu-icon items-start text-muted-foreground text-lg kt-menu-item-active:text-mono kt-menu-link-hover:text-mono"
+                >
                   <i class="ki-filled ki-people"></i>
                 </span>
-                <span class="kt-menu-title text-sm text-foreground kt-menu-item-active:font-medium kt-menu-item-active:text-mono kt-menu-link-hover:text-mono">
+                <span
+                  class="kt-menu-title text-sm text-foreground kt-menu-item-active:font-medium kt-menu-item-active:text-mono kt-menu-link-hover:text-mono"
+                >
                   Administrar usuarios
                 </span>
               </RouterLink>
             </div>
 
-            <div
-              class="kt-menu-item"
-              :class="{ active: route.name === 'role-management' }"
-            >
+            <div class="kt-menu-item" :class="{ active: route.name === 'roles.index' }">
               <RouterLink
-                :to="{ name: 'role-management' }"
+                :to="{ name: 'roles.index' }"
                 class="kt-menu-link gap-2.5 py-2 px-2.5 kt-menu-item-active:bg-secondary kt-menu-link-hover:bg-secondary"
               >
-                <span class="kt-menu-icon items-start text-muted-foreground text-lg kt-menu-item-active:text-mono kt-menu-link-hover:text-mono">
+                <span
+                  class="kt-menu-icon items-start text-muted-foreground text-lg kt-menu-item-active:text-mono kt-menu-link-hover:text-mono"
+                >
                   <i class="ki-filled ki-security-user"></i>
                 </span>
-                <span class="kt-menu-title text-sm text-foreground kt-menu-item-active:font-medium kt-menu-item-active:text-mono kt-menu-link-hover:text-mono">
+                <span
+                  class="kt-menu-title text-sm text-foreground kt-menu-item-active:font-medium kt-menu-item-active:text-mono kt-menu-link-hover:text-mono"
+                >
                   Administrar roles
                 </span>
               </RouterLink>
@@ -233,10 +248,7 @@ const isMyAccountActive = computed(() => route.path.startsWith("/account"));
                 </span>
               </div>
 
-              <div
-                class="kt-menu-accordion gap-px ps-7"
-                :class="{ show: isPublicProfileActive }"
-              >
+              <div class="kt-menu-accordion gap-px ps-7" :class="{ show: isPublicProfileActive }">
                 <!-- Profiles -->
                 <div
                   class="kt-menu-item"
@@ -269,10 +281,7 @@ const isMyAccountActive = computed(() => route.path.startsWith("/account"));
                     </span>
                   </div>
 
-                  <div
-                    class="kt-menu-accordion gap-px ps-2.5"
-                    :class="{ show: isProfilesActive }"
-                  >
+                  <div class="kt-menu-accordion gap-px ps-2.5" :class="{ show: isProfilesActive }">
                     <!-- Default -->
                     <div
                       class="kt-menu-item"
@@ -293,170 +302,8 @@ const isMyAccountActive = computed(() => route.path.startsWith("/account"));
                         </span>
                       </RouterLink>
                     </div>
-
-                    <!-- Creator -->
-                    <div class="kt-menu-item">
-                      <a
-                        href="#"
-                        class="kt-menu-link py-2 px-2.5 rounded-md kt-menu-item-active:bg-secondary kt-menu-link-hover:bg-secondary"
-                        @click.prevent
-                      >
-                        <span
-                          class="kt-menu-title text-sm text-foreground kt-menu-item-active:font-medium kt-menu-item-active:text-mono kt-menu-link-hover:text-mono"
-                        >
-                          Creator
-                        </span>
-                      </a>
-                    </div>
-
-                    <!-- Company -->
-                    <div class="kt-menu-item">
-                      <a
-                        href="#"
-                        class="kt-menu-link py-2 px-2.5 rounded-md kt-menu-item-active:bg-secondary kt-menu-link-hover:bg-secondary"
-                        @click.prevent
-                      >
-                        <span
-                          class="kt-menu-title text-sm text-foreground kt-menu-item-active:font-medium kt-menu-item-active:text-mono kt-menu-link-hover:text-mono"
-                        >
-                          Company
-                        </span>
-                      </a>
-                    </div>
-
-                    <!-- NFT -->
-                    <div class="kt-menu-item">
-                      <a
-                        href="#"
-                        class="kt-menu-link py-2 px-2.5 rounded-md kt-menu-item-active:bg-secondary kt-menu-link-hover:bg-secondary"
-                        @click.prevent
-                      >
-                        <span
-                          class="kt-menu-title text-sm text-foreground kt-menu-item-active:font-medium kt-menu-item-active:text-mono kt-menu-link-hover:text-mono"
-                        >
-                          NFT
-                        </span>
-                      </a>
-                    </div>
-
-                    <!-- Blogger -->
-                    <div class="kt-menu-item">
-                      <a
-                        href="#"
-                        class="kt-menu-link py-2 px-2.5 rounded-md kt-menu-item-active:bg-secondary kt-menu-link-hover:bg-secondary"
-                        @click.prevent
-                      >
-                        <span
-                          class="kt-menu-title text-sm text-foreground kt-menu-item-active:font-medium kt-menu-item-active:text-mono kt-menu-link-hover:text-mono"
-                        >
-                          Blogger
-                        </span>
-                      </a>
-                    </div>
-
-                    <!-- CRM -->
-                    <div class="kt-menu-item">
-                      <a
-                        href="#"
-                        class="kt-menu-link py-2 px-2.5 rounded-md kt-menu-item-active:bg-secondary kt-menu-link-hover:bg-secondary"
-                        @click.prevent
-                      >
-                        <span
-                          class="kt-menu-title text-sm text-foreground kt-menu-item-active:font-medium kt-menu-item-active:text-mono kt-menu-link-hover:text-mono"
-                        >
-                          CRM
-                        </span>
-                      </a>
-                    </div>
-
-                    <!-- Show more -->
-                    <div
-                      class="kt-menu-item flex-col-reverse"
-                      data-kt-menu-item-toggle="accordion"
-                      data-kt-menu-item-trigger="click"
-                    >
-                      <div
-                        class="kt-menu-link py-2 px-2.5 rounded-md border border-transparent !menu-item-here:bg-transparent"
-                      >
-                        <span
-                          class="kt-menu-title text-sm text-secondary-foreground kt-menu-link-hover:text-mono"
-                        >
-                          <span class="hidden kt-menu-item-show:flex!">
-                            Show less
-                          </span>
-
-                          <span class="flex kt-menu-item-show:hidden">
-                            Show 4 more
-                          </span>
-                        </span>
-
-                        <span
-                          class="kt-menu-arrow text-muted-foreground kt-menu-item-here:text-muted-foreground kt-menu-item-show:text-foreground kt-menu-link-hover:text-foreground"
-                        >
-                          <span class="inline-flex kt-menu-item-show:hidden">
-                            <i class="ki-filled ki-down text-xs"></i>
-                          </span>
-
-                          <span class="hidden kt-menu-item-show:inline-flex">
-                            <i class="ki-filled ki-up text-xs"></i>
-                          </span>
-                        </span>
-                      </div>
-
-                      <div class="kt-menu-accordion gap-px">
-                        <div class="kt-menu-item">
-                          <a
-                            href="#"
-                            class="kt-menu-link py-2 px-2.5 rounded-md kt-menu-item-active:bg-secondary kt-menu-link-hover:bg-secondary"
-                            @click.prevent
-                          >
-                            <span class="kt-menu-title text-sm text-foreground">
-                              Gamer
-                            </span>
-                          </a>
-                        </div>
-
-                        <div class="kt-menu-item">
-                          <a
-                            href="#"
-                            class="kt-menu-link py-2 px-2.5 rounded-md kt-menu-item-active:bg-secondary kt-menu-link-hover:bg-secondary"
-                            @click.prevent
-                          >
-                            <span class="kt-menu-title text-sm text-foreground">
-                              Feeds
-                            </span>
-                          </a>
-                        </div>
-
-                        <div class="kt-menu-item">
-                          <a
-                            href="#"
-                            class="kt-menu-link py-2 px-2.5 rounded-md kt-menu-item-active:bg-secondary kt-menu-link-hover:bg-secondary"
-                            @click.prevent
-                          >
-                            <span class="kt-menu-title text-sm text-foreground">
-                              Plain
-                            </span>
-                          </a>
-                        </div>
-
-                        <div class="kt-menu-item">
-                          <a
-                            href="#"
-                            class="kt-menu-link py-2 px-2.5 rounded-md kt-menu-item-active:bg-secondary kt-menu-link-hover:bg-secondary"
-                            @click.prevent
-                          >
-                            <span class="kt-menu-title text-sm text-foreground">
-                              Modal
-                            </span>
-                          </a>
-                        </div>
-                      </div>
-                    </div>
                   </div>
                 </div>
-
-                <!-- Aquí continúa Projects, Works, Teams, etc. -->
               </div>
             </div>
             <div
@@ -492,11 +339,7 @@ const isMyAccountActive = computed(() => route.path.startsWith("/account"));
                   </span>
                 </span>
               </div>
-              <div
-                class="kt-menu-accordion gap-px ps-7"
-                :class="{ show: isMyAccountActive }"
-              >
-
+              <div class="kt-menu-accordion gap-px ps-7" :class="{ show: isMyAccountActive }">
                 <div
                   class="kt-menu-item"
                   :class="{
@@ -514,998 +357,14 @@ const isMyAccountActive = computed(() => route.path.startsWith("/account"));
                     </span>
                   </RouterLink>
                 </div>
-                <div class="kt-menu-item">
-                  <a
-                    class="kt-menu-link py-2 px-2.5 rounded-md kt-menu-item-active:bg-secondary kt-menu-link-hover:bg-secondary"
-                    href="#"
-                    @click.prevent
-                  >
-                    <span
-                      class="kt-menu-title text-sm text-foreground kt-menu-item-active:font-medium kt-menu-item-active:text-mono kt-menu-link-hover:text-mono"
-                    >
-                      Notifications
-                    </span>
-                  </a>
-                </div>
-                <div class="kt-menu-item">
-                  <a
-                    class="kt-menu-link py-2 px-2.5 rounded-md kt-menu-item-active:bg-secondary kt-menu-link-hover:bg-secondary"
-                    href="#"
-                    @click.prevent
-                  >
-                    <span
-                      class="kt-menu-title text-sm text-foreground kt-menu-item-active:font-medium kt-menu-item-active:text-mono kt-menu-link-hover:text-mono"
-                    >
-                      API Keys
-                    </span>
-                  </a>
-                </div>
-                <div
-                  class="kt-menu-item flex-col-reverse"
-                  data-kt-menu-item-toggle="accordion"
-                  data-kt-menu-item-trigger="click"
-                >
-                  <div
-                    class="kt-menu-link py-2 px-2.5 rounded-md border border-transparent !menu-item-here:bg-transparent"
-                  >
-                    <span
-                      class="kt-menu-title text-sm text-secondary-foreground kt-menu-link-hover:text-mono"
-                    >
-                      <span class="hidden kt-menu-item-show:!flex">
-                        Show less
-                      </span>
-                      <span class="flex kt-menu-item-show:hidden">
-                        Show 3 more
-                      </span>
-                    </span>
-                    <span
-                      class="kt-menu-arrow text-muted-foreground kt-menu-item-here:text-muted-foreground kt-menu-item-show:text-foreground kt-menu-link-hover:text-foreground"
-                    >
-                      <span class="inline-flex kt-menu-item-show:hidden">
-                        <i class="ki-filled ki-down text-xs"> </i>
-                      </span>
-                      <span class="hidden kt-menu-item-show:inline-flex">
-                        <i class="ki-filled ki-up text-xs"> </i>
-                      </span>
-                    </span>
-                  </div>
-                  <div class="kt-menu-accordion gap-px">
-                    <div class="kt-menu-item">
-                      <a
-                        class="kt-menu-link py-2 px-2.5 rounded-md kt-menu-item-active:bg-secondary kt-menu-link-hover:bg-secondary"
-                        href="#"
-                        @click.prevent
-                      >
-                        <span
-                          class="kt-menu-title text-sm text-foreground kt-menu-item-active:font-medium kt-menu-item-active:text-mono kt-menu-link-hover:text-mono"
-                        >
-                          Appearance
-                        </span>
-                      </a>
-                    </div>
-                    <div class="kt-menu-item">
-                      <a
-                        class="kt-menu-link py-2 px-2.5 rounded-md kt-menu-item-active:bg-secondary kt-menu-link-hover:bg-secondary"
-                        href="#"
-                        @click.prevent
-                      >
-                        <span
-                          class="kt-menu-title text-sm text-foreground kt-menu-item-active:font-medium kt-menu-item-active:text-mono kt-menu-link-hover:text-mono"
-                        >
-                          Invite a Friend
-                        </span>
-                      </a>
-                    </div>
-                    <div class="kt-menu-item">
-                      <a
-                        class="kt-menu-link py-2 px-2.5 rounded-md kt-menu-item-active:bg-secondary kt-menu-link-hover:bg-secondary"
-                        href="#"
-                        @click.prevent
-                      >
-                        <span
-                          class="kt-menu-title text-sm text-foreground kt-menu-item-active:font-medium kt-menu-item-active:text-mono kt-menu-link-hover:text-mono"
-                        >
-                          Activity
-                        </span>
-                      </a>
-                    </div>
-                  </div>
-                </div>
+                <
               </div>
-            </div>
-            <div
-              class="kt-menu-item"
-              data-kt-menu-item-toggle="accordion"
-              data-kt-menu-item-trigger="click"
-            >
-              <div
-                class="kt-menu-link gap-2.5 py-2 px-2.5 rounded-md kt-menu-item-hover:bg-transparent kt-menu-item-here:bg-transparent"
-              >
-                <span
-                  class="kt-menu-icon items-start text-muted-foreground text-lg kt-menu-item-here:text-mono kt-menu-item-show:text-mono kt-menu-link-hover:text-mono"
-                >
-                  <i class="ki-filled ki-users"> </i>
-                </span>
-                <span
-                  class="kt-menu-title font-medium text-sm text-secondary-foreground kt-menu-item-here:text-mono kt-menu-item-show:text-mono kt-menu-link-hover:text-mono"
-                >
-                  Network
-                </span>
-                <span
-                  class="kt-menu-arrow text-muted-foreground kt-menu-item-here:text-muted-foreground kt-menu-item-show:text-foreground kt-menu-link-hover:text-foreground"
-                >
-                  <span class="inline-flex kt-menu-item-show:hidden">
-                    <i class="ki-filled ki-down text-xs"> </i>
-                  </span>
-                  <span class="hidden kt-menu-item-show:inline-flex">
-                    <i class="ki-filled ki-up text-xs"> </i>
-                  </span>
-                </span>
-              </div>
-              <div class="kt-menu-accordion gap-px ps-7">
-                <div class="kt-menu-item">
-                  <a
-                    class="kt-menu-link py-2 px-2.5 rounded-md kt-menu-item-active:bg-secondary kt-menu-link-hover:bg-secondary"
-                    href="#"
-                    @click.prevent
-                  >
-                    <span
-                      class="kt-menu-title text-sm text-foreground kt-menu-item-active:font-medium kt-menu-item-active:text-mono kt-menu-link-hover:text-mono"
-                    >
-                      Get Started
-                    </span>
-                  </a>
-                </div>
-                <div
-                  class="kt-menu-item"
-                  data-kt-menu-item-toggle="accordion"
-                  data-kt-menu-item-trigger="click"
-                >
-                  <div
-                    class="kt-menu-link py-2 px-2.5 rounded-md border border-transparent !menu-item-here:bg-transparent"
-                  >
-                    <span
-                      class="kt-menu-title text-sm text-foreground kt-menu-item-here:text-mono kt-menu-item-show:text-mono kt-menu-link-hover:text-mono"
-                    >
-                      User Cards
-                    </span>
-                    <span
-                      class="kt-menu-arrow text-muted-foreground kt-menu-item-here:text-muted-foreground kt-menu-item-show:text-foreground kt-menu-link-hover:text-foreground"
-                    >
-                      <span class="inline-flex kt-menu-item-show:hidden">
-                        <i class="ki-filled ki-down text-xs"> </i>
-                      </span>
-                      <span class="hidden kt-menu-item-show:inline-flex">
-                        <i class="ki-filled ki-up text-xs"> </i>
-                      </span>
-                    </span>
-                  </div>
-                  <div class="kt-menu-accordion gap-px ps-2.5">
-                    <div class="kt-menu-item">
-                      <a
-                        class="kt-menu-link py-2 px-2.5 rounded-md kt-menu-item-active:bg-secondary kt-menu-link-hover:bg-secondary"
-                        href="#"
-                        @click.prevent
-                      >
-                        <span
-                          class="kt-menu-title text-sm text-foreground kt-menu-item-active:font-medium kt-menu-item-active:text-mono kt-menu-link-hover:text-mono"
-                        >
-                          Mini Cards
-                        </span>
-                      </a>
-                    </div>
-                    <div class="kt-menu-item">
-                      <a
-                        class="kt-menu-link py-2 px-2.5 rounded-md kt-menu-item-active:bg-secondary kt-menu-link-hover:bg-secondary"
-                        href="#"
-                        @click.prevent
-                      >
-                        <span
-                          class="kt-menu-title text-sm text-foreground kt-menu-item-active:font-medium kt-menu-item-active:text-mono kt-menu-link-hover:text-mono"
-                        >
-                          Team Crew
-                        </span>
-                      </a>
-                    </div>
-                    <div class="kt-menu-item">
-                      <a
-                        class="kt-menu-link py-2 px-2.5 rounded-md kt-menu-item-active:bg-secondary kt-menu-link-hover:bg-secondary"
-                        href="#"
-                        @click.prevent
-                      >
-                        <span
-                          class="kt-menu-title text-sm text-foreground kt-menu-item-active:font-medium kt-menu-item-active:text-mono kt-menu-link-hover:text-mono"
-                        >
-                          Author
-                        </span>
-                      </a>
-                    </div>
-                    <div class="kt-menu-item">
-                      <a
-                        class="kt-menu-link py-2 px-2.5 rounded-md kt-menu-item-active:bg-secondary kt-menu-link-hover:bg-secondary"
-                        href="#"
-                        @click.prevent
-                      >
-                        <span
-                          class="kt-menu-title text-sm text-foreground kt-menu-item-active:font-medium kt-menu-item-active:text-mono kt-menu-link-hover:text-mono"
-                        >
-                          NFT
-                        </span>
-                      </a>
-                    </div>
-                    <div class="kt-menu-item">
-                      <a
-                        class="kt-menu-link py-2 px-2.5 rounded-md kt-menu-item-active:bg-secondary kt-menu-link-hover:bg-secondary"
-                        href="#"
-                        @click.prevent
-                      >
-                        <span
-                          class="kt-menu-title text-sm text-foreground kt-menu-item-active:font-medium kt-menu-item-active:text-mono kt-menu-link-hover:text-mono"
-                        >
-                          Social
-                        </span>
-                      </a>
-                    </div>
-                  </div>
-                </div>
-                <div
-                  class="kt-menu-item"
-                  data-kt-menu-item-toggle="accordion"
-                  data-kt-menu-item-trigger="click"
-                >
-                  <div
-                    class="kt-menu-link py-2 px-2.5 rounded-md border border-transparent !menu-item-here:bg-transparent"
-                  >
-                    <span
-                      class="kt-menu-title text-sm text-foreground kt-menu-item-here:text-mono kt-menu-item-show:text-mono kt-menu-link-hover:text-mono"
-                    >
-                      User Table
-                    </span>
-                    <span
-                      class="kt-menu-arrow text-muted-foreground kt-menu-item-here:text-muted-foreground kt-menu-item-show:text-foreground kt-menu-link-hover:text-foreground"
-                    >
-                      <span class="inline-flex kt-menu-item-show:hidden">
-                        <i class="ki-filled ki-down text-xs"> </i>
-                      </span>
-                      <span class="hidden kt-menu-item-show:inline-flex">
-                        <i class="ki-filled ki-up text-xs"> </i>
-                      </span>
-                    </span>
-                  </div>
-                  <div class="kt-menu-accordion gap-px ps-2.5">
-                    <div class="kt-menu-item">
-                      <a
-                        class="kt-menu-link py-2 px-2.5 rounded-md kt-menu-item-active:bg-secondary kt-menu-link-hover:bg-secondary"
-                        href="#"
-                        @click.prevent
-                      >
-                        <span
-                          class="kt-menu-title text-sm text-foreground kt-menu-item-active:font-medium kt-menu-item-active:text-mono kt-menu-link-hover:text-mono"
-                        >
-                          Team Crew
-                        </span>
-                      </a>
-                    </div>
-                    <div class="kt-menu-item">
-                      <a
-                        class="kt-menu-link py-2 px-2.5 rounded-md kt-menu-item-active:bg-secondary kt-menu-link-hover:bg-secondary"
-                        href="#"
-                        @click.prevent
-                      >
-                        <span
-                          class="kt-menu-title text-sm text-foreground kt-menu-item-active:font-medium kt-menu-item-active:text-mono kt-menu-link-hover:text-mono"
-                        >
-                          App Roster
-                        </span>
-                      </a>
-                    </div>
-                    <div class="kt-menu-item">
-                      <a
-                        class="kt-menu-link py-2 px-2.5 rounded-md kt-menu-item-active:bg-secondary kt-menu-link-hover:bg-secondary"
-                        href="#"
-                        @click.prevent
-                      >
-                        <span
-                          class="kt-menu-title text-sm text-foreground kt-menu-item-active:font-medium kt-menu-item-active:text-mono kt-menu-link-hover:text-mono"
-                        >
-                          Market Authors
-                        </span>
-                      </a>
-                    </div>
-                    <div class="kt-menu-item">
-                      <a
-                        class="kt-menu-link py-2 px-2.5 rounded-md kt-menu-item-active:bg-secondary kt-menu-link-hover:bg-secondary"
-                        href="#"
-                        @click.prevent
-                      >
-                        <span
-                          class="kt-menu-title text-sm text-foreground kt-menu-item-active:font-medium kt-menu-item-active:text-mono kt-menu-link-hover:text-mono"
-                        >
-                          SaaS Users
-                        </span>
-                      </a>
-                    </div>
-                    <div class="kt-menu-item">
-                      <a
-                        class="kt-menu-link py-2 px-2.5 rounded-md kt-menu-item-active:bg-secondary kt-menu-link-hover:bg-secondary"
-                        href="#"
-                        @click.prevent
-                      >
-                        <span
-                          class="kt-menu-title text-sm text-foreground kt-menu-item-active:font-medium kt-menu-item-active:text-mono kt-menu-link-hover:text-mono"
-                        >
-                          Store Clients
-                        </span>
-                      </a>
-                    </div>
-                    <div class="kt-menu-item">
-                      <a
-                        class="kt-menu-link py-2 px-2.5 rounded-md kt-menu-item-active:bg-secondary kt-menu-link-hover:bg-secondary"
-                        href="#"
-                        @click.prevent
-                      >
-                        <span
-                          class="kt-menu-title text-sm text-foreground kt-menu-item-active:font-medium kt-menu-item-active:text-mono kt-menu-link-hover:text-mono"
-                        >
-                          Visitors
-                        </span>
-                      </a>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-            <div
-              class="kt-menu-item"
-              data-kt-menu-item-toggle="accordion"
-              data-kt-menu-item-trigger="click"
-            >
-              <div
-                class="kt-menu-link gap-2.5 py-2 px-2.5 rounded-md kt-menu-item-hover:bg-transparent kt-menu-item-here:bg-transparent"
-              >
-                <span
-                  class="kt-menu-icon items-start text-muted-foreground text-lg kt-menu-item-here:text-mono kt-menu-item-show:text-mono kt-menu-link-hover:text-mono"
-                >
-                  <i class="ki-filled ki-security-user"> </i>
-                </span>
-                <span
-                  class="kt-menu-title font-medium text-sm text-secondary-foreground kt-menu-item-here:text-mono kt-menu-item-show:text-mono kt-menu-link-hover:text-mono"
-                >
-                  Authentication
-                </span>
-                <span
-                  class="kt-menu-arrow text-muted-foreground kt-menu-item-here:text-muted-foreground kt-menu-item-show:text-foreground kt-menu-link-hover:text-foreground"
-                >
-                  <span class="inline-flex kt-menu-item-show:hidden">
-                    <i class="ki-filled ki-down text-xs"> </i>
-                  </span>
-                  <span class="hidden kt-menu-item-show:inline-flex">
-                    <i class="ki-filled ki-up text-xs"> </i>
-                  </span>
-                </span>
-              </div>
-              <div class="kt-menu-accordion gap-px ps-7">
-                <div
-                  class="kt-menu-item"
-                  data-kt-menu-item-toggle="accordion"
-                  data-kt-menu-item-trigger="click"
-                >
-                  <div
-                    class="kt-menu-link py-2 px-2.5 rounded-md border border-transparent !menu-item-here:bg-transparent"
-                  >
-                    <span
-                      class="kt-menu-title text-sm text-foreground kt-menu-item-here:text-mono kt-menu-item-show:text-mono kt-menu-link-hover:text-mono"
-                    >
-                      Classic
-                    </span>
-                    <span
-                      class="kt-menu-arrow text-muted-foreground kt-menu-item-here:text-muted-foreground kt-menu-item-show:text-foreground kt-menu-link-hover:text-foreground"
-                    >
-                      <span class="inline-flex kt-menu-item-show:hidden">
-                        <i class="ki-filled ki-down text-xs"> </i>
-                      </span>
-                      <span class="hidden kt-menu-item-show:inline-flex">
-                        <i class="ki-filled ki-up text-xs"> </i>
-                      </span>
-                    </span>
-                  </div>
-                  <div class="kt-menu-accordion gap-px ps-2.5">
-                    <div class="kt-menu-item">
-                      <a
-                        class="kt-menu-link py-2 px-2.5 rounded-md kt-menu-item-active:bg-secondary kt-menu-link-hover:bg-secondary"
-                        href="#"
-                        @click.prevent
-                      >
-                        <span
-                          class="kt-menu-title text-sm text-foreground kt-menu-item-active:font-medium kt-menu-item-active:text-mono kt-menu-link-hover:text-mono"
-                        >
-                          Sign In
-                        </span>
-                      </a>
-                    </div>
-                    <div class="kt-menu-item">
-                      <a
-                        class="kt-menu-link py-2 px-2.5 rounded-md kt-menu-item-active:bg-secondary kt-menu-link-hover:bg-secondary"
-                        href="#"
-                        @click.prevent
-                      >
-                        <span
-                          class="kt-menu-title text-sm text-foreground kt-menu-item-active:font-medium kt-menu-item-active:text-mono kt-menu-link-hover:text-mono"
-                        >
-                          Sign Up
-                        </span>
-                      </a>
-                    </div>
-                    <div class="kt-menu-item">
-                      <a
-                        class="kt-menu-link py-2 px-2.5 rounded-md kt-menu-item-active:bg-secondary kt-menu-link-hover:bg-secondary"
-                        href="#"
-                        @click.prevent
-                      >
-                        <span
-                          class="kt-menu-title text-sm text-foreground kt-menu-item-active:font-medium kt-menu-item-active:text-mono kt-menu-link-hover:text-mono"
-                        >
-                          2FA
-                        </span>
-                      </a>
-                    </div>
-                    <div class="kt-menu-item">
-                      <a
-                        class="kt-menu-link py-2 px-2.5 rounded-md kt-menu-item-active:bg-secondary kt-menu-link-hover:bg-secondary"
-                        href="#"
-                        @click.prevent
-                      >
-                        <span
-                          class="kt-menu-title text-sm text-foreground kt-menu-item-active:font-medium kt-menu-item-active:text-mono kt-menu-link-hover:text-mono"
-                        >
-                          Check Email
-                        </span>
-                      </a>
-                    </div>
-                    <div
-                      class="kt-menu-item"
-                      data-kt-menu-item-toggle="accordion"
-                      data-kt-menu-item-trigger="click"
-                    >
-                      <div
-                        class="kt-menu-link py-2 px-2.5 rounded-md border border-transparent !menu-item-here:bg-transparent"
-                      >
-                        <span
-                          class="kt-menu-title text-sm text-foreground kt-menu-item-here:text-mono kt-menu-item-show:text-mono kt-menu-link-hover:text-mono"
-                        >
-                          Reset Password
-                        </span>
-                        <span
-                          class="kt-menu-arrow text-muted-foreground kt-menu-item-here:text-muted-foreground kt-menu-item-show:text-foreground kt-menu-link-hover:text-foreground"
-                        >
-                          <span class="inline-flex kt-menu-item-show:hidden">
-                            <i class="ki-filled ki-down text-xs"> </i>
-                          </span>
-                          <span class="hidden kt-menu-item-show:inline-flex">
-                            <i class="ki-filled ki-up text-xs"> </i>
-                          </span>
-                        </span>
-                      </div>
-                      <div class="kt-menu-accordion gap-px ps-2.5">
-                        <div class="kt-menu-item">
-                          <a
-                            class="kt-menu-link py-2 px-2.5 rounded-md kt-menu-item-active:bg-secondary kt-menu-link-hover:bg-secondary"
-                            href="#"
-                            @click.prevent
-                          >
-                            <span
-                              class="kt-menu-title text-sm text-foreground kt-menu-item-active:font-medium kt-menu-item-active:text-mono kt-menu-link-hover:text-mono"
-                            >
-                              Enter Email
-                            </span>
-                          </a>
-                        </div>
-                        <div class="kt-menu-item">
-                          <a
-                            class="kt-menu-link py-2 px-2.5 rounded-md kt-menu-item-active:bg-secondary kt-menu-link-hover:bg-secondary"
-                            href="#"
-                            @click.prevent
-                          >
-                            <span
-                              class="kt-menu-title text-sm text-foreground kt-menu-item-active:font-medium kt-menu-item-active:text-mono kt-menu-link-hover:text-mono"
-                            >
-                              Check Email
-                            </span>
-                          </a>
-                        </div>
-                        <div class="kt-menu-item">
-                          <a
-                            class="kt-menu-link py-2 px-2.5 rounded-md kt-menu-item-active:bg-secondary kt-menu-link-hover:bg-secondary"
-                            href="#"
-                            @click.prevent
-                          >
-                            <span
-                              class="kt-menu-title text-sm text-foreground kt-menu-item-active:font-medium kt-menu-item-active:text-mono kt-menu-link-hover:text-mono"
-                            >
-                              Change Password
-                            </span>
-                          </a>
-                        </div>
-                        <div class="kt-menu-item">
-                          <a
-                            class="kt-menu-link py-2 px-2.5 rounded-md kt-menu-item-active:bg-secondary kt-menu-link-hover:bg-secondary"
-                            href="#"
-                            @click.prevent
-                          >
-                            <span
-                              class="kt-menu-title text-sm text-foreground kt-menu-item-active:font-medium kt-menu-item-active:text-mono kt-menu-link-hover:text-mono"
-                            >
-                              Password is Changed
-                            </span>
-                          </a>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-                <div
-                  class="kt-menu-item"
-                  data-kt-menu-item-toggle="accordion"
-                  data-kt-menu-item-trigger="click"
-                >
-                  <div
-                    class="kt-menu-link py-2 px-2.5 rounded-md border border-transparent !menu-item-here:bg-transparent"
-                  >
-                    <span
-                      class="kt-menu-title text-sm text-foreground kt-menu-item-here:text-mono kt-menu-item-show:text-mono kt-menu-link-hover:text-mono"
-                    >
-                      Branded
-                    </span>
-                    <span
-                      class="kt-menu-arrow text-muted-foreground kt-menu-item-here:text-muted-foreground kt-menu-item-show:text-foreground kt-menu-link-hover:text-foreground"
-                    >
-                      <span class="inline-flex kt-menu-item-show:hidden">
-                        <i class="ki-filled ki-down text-xs"> </i>
-                      </span>
-                      <span class="hidden kt-menu-item-show:inline-flex">
-                        <i class="ki-filled ki-up text-xs"> </i>
-                      </span>
-                    </span>
-                  </div>
-                  <div class="kt-menu-accordion gap-px ps-2.5">
-                    <div class="kt-menu-item">
-                      <a
-                        class="kt-menu-link py-2 px-2.5 rounded-md kt-menu-item-active:bg-secondary kt-menu-link-hover:bg-secondary"
-                        href="#"
-                        @click.prevent
-                      >
-                        <span
-                          class="kt-menu-title text-sm text-foreground kt-menu-item-active:font-medium kt-menu-item-active:text-mono kt-menu-link-hover:text-mono"
-                        >
-                          Sign In
-                        </span>
-                      </a>
-                    </div>
-                    <div class="kt-menu-item">
-                      <a
-                        class="kt-menu-link py-2 px-2.5 rounded-md kt-menu-item-active:bg-secondary kt-menu-link-hover:bg-secondary"
-                        href="#"
-                        @click.prevent
-                      >
-                        <span
-                          class="kt-menu-title text-sm text-foreground kt-menu-item-active:font-medium kt-menu-item-active:text-mono kt-menu-link-hover:text-mono"
-                        >
-                          Sign Up
-                        </span>
-                      </a>
-                    </div>
-                    <div class="kt-menu-item">
-                      <a
-                        class="kt-menu-link py-2 px-2.5 rounded-md kt-menu-item-active:bg-secondary kt-menu-link-hover:bg-secondary"
-                        href="#"
-                        @click.prevent
-                      >
-                        <span
-                          class="kt-menu-title text-sm text-foreground kt-menu-item-active:font-medium kt-menu-item-active:text-mono kt-menu-link-hover:text-mono"
-                        >
-                          2FA
-                        </span>
-                      </a>
-                    </div>
-                    <div class="kt-menu-item">
-                      <a
-                        class="kt-menu-link py-2 px-2.5 rounded-md kt-menu-item-active:bg-secondary kt-menu-link-hover:bg-secondary"
-                        href="#"
-                        @click.prevent
-                      >
-                        <span
-                          class="kt-menu-title text-sm text-foreground kt-menu-item-active:font-medium kt-menu-item-active:text-mono kt-menu-link-hover:text-mono"
-                        >
-                          Check Email
-                        </span>
-                      </a>
-                    </div>
-                    <div
-                      class="kt-menu-item"
-                      data-kt-menu-item-toggle="accordion"
-                      data-kt-menu-item-trigger="click"
-                    >
-                      <div
-                        class="kt-menu-link py-2 px-2.5 rounded-md border border-transparent !menu-item-here:bg-transparent"
-                      >
-                        <span
-                          class="kt-menu-title text-sm text-foreground kt-menu-item-here:text-mono kt-menu-item-show:text-mono kt-menu-link-hover:text-mono"
-                        >
-                          Reset Password
-                        </span>
-                        <span
-                          class="kt-menu-arrow text-muted-foreground kt-menu-item-here:text-muted-foreground kt-menu-item-show:text-foreground kt-menu-link-hover:text-foreground"
-                        >
-                          <span class="inline-flex kt-menu-item-show:hidden">
-                            <i class="ki-filled ki-down text-xs"> </i>
-                          </span>
-                          <span class="hidden kt-menu-item-show:inline-flex">
-                            <i class="ki-filled ki-up text-xs"> </i>
-                          </span>
-                        </span>
-                      </div>
-                      <div class="kt-menu-accordion gap-px ps-2.5">
-                        <div class="kt-menu-item">
-                          <a
-                            class="kt-menu-link py-2 px-2.5 rounded-md kt-menu-item-active:bg-secondary kt-menu-link-hover:bg-secondary"
-                            href="#"
-                            @click.prevent
-                          >
-                            <span
-                              class="kt-menu-title text-sm text-foreground kt-menu-item-active:font-medium kt-menu-item-active:text-mono kt-menu-link-hover:text-mono"
-                            >
-                              Enter Email
-                            </span>
-                          </a>
-                        </div>
-                        <div class="kt-menu-item">
-                          <a
-                            class="kt-menu-link py-2 px-2.5 rounded-md kt-menu-item-active:bg-secondary kt-menu-link-hover:bg-secondary"
-                            href="#"
-                            @click.prevent
-                          >
-                            <span
-                              class="kt-menu-title text-sm text-foreground kt-menu-item-active:font-medium kt-menu-item-active:text-mono kt-menu-link-hover:text-mono"
-                            >
-                              Check Email
-                            </span>
-                          </a>
-                        </div>
-                        <div class="kt-menu-item">
-                          <a
-                            class="kt-menu-link py-2 px-2.5 rounded-md kt-menu-item-active:bg-secondary kt-menu-link-hover:bg-secondary"
-                            href="#"
-                            @click.prevent
-                          >
-                            <span
-                              class="kt-menu-title text-sm text-foreground kt-menu-item-active:font-medium kt-menu-item-active:text-mono kt-menu-link-hover:text-mono"
-                            >
-                              Change Password
-                            </span>
-                          </a>
-                        </div>
-                        <div class="kt-menu-item">
-                          <a
-                            class="kt-menu-link py-2 px-2.5 rounded-md kt-menu-item-active:bg-secondary kt-menu-link-hover:bg-secondary"
-                            href="#"
-                            @click.prevent
-                          >
-                            <span
-                              class="kt-menu-title text-sm text-foreground kt-menu-item-active:font-medium kt-menu-item-active:text-mono kt-menu-link-hover:text-mono"
-                            >
-                              Password is Changed
-                            </span>
-                          </a>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-                <div class="kt-menu-item">
-                  <a
-                    class="kt-menu-link py-2 px-2.5 rounded-md kt-menu-item-active:bg-secondary kt-menu-link-hover:bg-secondary"
-                    href="#"
-                    @click.prevent
-                  >
-                    <span
-                      class="kt-menu-title text-sm text-foreground kt-menu-item-active:font-medium kt-menu-item-active:text-mono kt-menu-link-hover:text-mono"
-                    >
-                      Welcome Message
-                    </span>
-                  </a>
-                </div>
-                <div class="kt-menu-item">
-                  <a
-                    class="kt-menu-link py-2 px-2.5 rounded-md kt-menu-item-active:bg-secondary kt-menu-link-hover:bg-secondary"
-                    href="#"
-                    @click.prevent
-                  >
-                    <span
-                      class="kt-menu-title text-sm text-foreground kt-menu-item-active:font-medium kt-menu-item-active:text-mono kt-menu-link-hover:text-mono"
-                    >
-                      Welcome Message 2
-                    </span>
-                  </a>
-                </div>
-                <div class="kt-menu-item">
-                  <a
-                    class="kt-menu-link py-2 px-2.5 rounded-md kt-menu-item-active:bg-secondary kt-menu-link-hover:bg-secondary"
-                    href="#"
-                    @click.prevent
-                  >
-                    <span
-                      class="kt-menu-title text-sm text-foreground kt-menu-item-active:font-medium kt-menu-item-active:text-mono kt-menu-link-hover:text-mono"
-                    >
-                      Account Deactivated
-                    </span>
-                  </a>
-                </div>
-                <div class="kt-menu-item">
-                  <a
-                    class="kt-menu-link py-2 px-2.5 rounded-md kt-menu-item-active:bg-secondary kt-menu-link-hover:bg-secondary"
-                    href="#"
-                    @click.prevent
-                  >
-                    <span
-                      class="kt-menu-title text-sm text-foreground kt-menu-item-active:font-medium kt-menu-item-active:text-mono kt-menu-link-hover:text-mono"
-                    >
-                      Error 404
-                    </span>
-                  </a>
-                </div>
-                <div class="kt-menu-item">
-                  <a
-                    class="kt-menu-link py-2 px-2.5 rounded-md kt-menu-item-active:bg-secondary kt-menu-link-hover:bg-secondary"
-                    href="#"
-                    @click.prevent
-                  >
-                    <span
-                      class="kt-menu-title text-sm text-foreground kt-menu-item-active:font-medium kt-menu-item-active:text-mono kt-menu-link-hover:text-mono"
-                    >
-                      Error 500
-                    </span>
-                  </a>
-                </div>
-              </div>
-            </div>
-            <div
-              class="kt-menu-item"
-              data-kt-menu-item-toggle="accordion"
-              data-kt-menu-item-trigger="click"
-            >
-              <div
-                class="kt-menu-link gap-2.5 py-2 px-2.5 rounded-md kt-menu-item-hover:bg-transparent kt-menu-item-here:bg-transparent"
-              >
-                <span
-                  class="kt-menu-icon items-start text-muted-foreground text-lg kt-menu-item-here:text-mono kt-menu-item-show:text-mono kt-menu-link-hover:text-mono"
-                >
-                  <i class="ki-filled ki-users"> </i>
-                </span>
-                <span
-                  class="kt-menu-title font-medium text-sm text-secondary-foreground kt-menu-item-here:text-mono kt-menu-item-show:text-mono kt-menu-link-hover:text-mono"
-                >
-                  Store - Client
-                </span>
-                <span
-                  class="kt-menu-arrow text-muted-foreground kt-menu-item-here:text-muted-foreground kt-menu-item-show:text-foreground kt-menu-link-hover:text-foreground"
-                >
-                  <span class="inline-flex kt-menu-item-show:hidden">
-                    <i class="ki-filled ki-down text-xs"> </i>
-                  </span>
-                  <span class="hidden kt-menu-item-show:inline-flex">
-                    <i class="ki-filled ki-up text-xs"> </i>
-                  </span>
-                </span>
-              </div>
-              <div class="kt-menu-accordion gap-px ps-7">
-                <div class="kt-menu-item">
-                  <a
-                    class="kt-menu-link py-2 px-2.5 rounded-md kt-menu-item-active:bg-secondary kt-menu-link-hover:bg-secondary"
-                    href="#"
-                    @click.prevent
-                  >
-                    <span
-                      class="kt-menu-title text-sm text-foreground kt-menu-item-active:font-medium kt-menu-item-active:text-mono kt-menu-link-hover:text-mono"
-                    >
-                      Home
-                    </span>
-                  </a>
-                </div>
-                <div class="kt-menu-item">
-                  <a
-                    class="kt-menu-link py-2 px-2.5 rounded-md kt-menu-item-active:bg-secondary kt-menu-link-hover:bg-secondary"
-                    href="#"
-                    @click.prevent
-                  >
-                    <span
-                      class="kt-menu-title text-sm text-foreground kt-menu-item-active:font-medium kt-menu-item-active:text-mono kt-menu-link-hover:text-mono"
-                    >
-                      Search Results - Grid
-                    </span>
-                  </a>
-                </div>
-                <div class="kt-menu-item">
-                  <a
-                    class="kt-menu-link py-2 px-2.5 rounded-md kt-menu-item-active:bg-secondary kt-menu-link-hover:bg-secondary"
-                    href="#"
-                    @click.prevent
-                  >
-                    <span
-                      class="kt-menu-title text-sm text-foreground kt-menu-item-active:font-medium kt-menu-item-active:text-mono kt-menu-link-hover:text-mono"
-                    >
-                      Search Results - List
-                    </span>
-                  </a>
-                </div>
-                <div class="kt-menu-item">
-                  <a
-                    class="kt-menu-link py-2 px-2.5 rounded-md kt-menu-item-active:bg-secondary kt-menu-link-hover:bg-secondary"
-                    href="#"
-                    @click.prevent
-                  >
-                    <span
-                      class="kt-menu-title text-sm text-foreground kt-menu-item-active:font-medium kt-menu-item-active:text-mono kt-menu-link-hover:text-mono"
-                    >
-                      Product Details
-                    </span>
-                  </a>
-                </div>
-                <div class="kt-menu-item">
-                  <a
-                    class="kt-menu-link py-2 px-2.5 rounded-md kt-menu-item-active:bg-secondary kt-menu-link-hover:bg-secondary"
-                    href="#"
-                    @click.prevent
-                  >
-                    <span
-                      class="kt-menu-title text-sm text-foreground kt-menu-item-active:font-medium kt-menu-item-active:text-mono kt-menu-link-hover:text-mono"
-                    >
-                      Shopping Cart
-                    </span>
-                  </a>
-                </div>
-                <div class="kt-menu-item">
-                  <a
-                    class="kt-menu-link py-2 px-2.5 rounded-md kt-menu-item-active:bg-secondary kt-menu-link-hover:bg-secondary"
-                    href="#"
-                    @click.prevent
-                  >
-                    <span
-                      class="kt-menu-title text-sm text-foreground kt-menu-item-active:font-medium kt-menu-item-active:text-mono kt-menu-link-hover:text-mono"
-                    >
-                      Wishlist
-                    </span>
-                  </a>
-                </div>
-                <div
-                  class="kt-menu-item"
-                  data-kt-menu-item-toggle="accordion"
-                  data-kt-menu-item-trigger="click"
-                >
-                  <div
-                    class="kt-menu-link py-2 px-2.5 rounded-md border border-transparent !menu-item-here:bg-transparent"
-                  >
-                    <span
-                      class="kt-menu-title text-sm text-foreground kt-menu-item-here:text-mono kt-menu-item-show:text-mono kt-menu-link-hover:text-mono"
-                    >
-                      Checkout
-                    </span>
-                    <span
-                      class="kt-menu-arrow text-muted-foreground kt-menu-item-here:text-muted-foreground kt-menu-item-show:text-foreground kt-menu-link-hover:text-foreground"
-                    >
-                      <span class="inline-flex kt-menu-item-show:hidden">
-                        <i class="ki-filled ki-down text-xs"> </i>
-                      </span>
-                      <span class="hidden kt-menu-item-show:inline-flex">
-                        <i class="ki-filled ki-up text-xs"> </i>
-                      </span>
-                    </span>
-                  </div>
-                  <div class="kt-menu-accordion gap-px ps-2.5">
-                    <div class="kt-menu-item">
-                      <a
-                        class="kt-menu-link py-2 px-2.5 rounded-md kt-menu-item-active:bg-secondary kt-menu-link-hover:bg-secondary"
-                        href="#"
-                        @click.prevent
-                      >
-                        <span
-                          class="kt-menu-title text-sm text-foreground kt-menu-item-active:font-medium kt-menu-item-active:text-mono kt-menu-link-hover:text-mono"
-                        >
-                          Order Summary
-                        </span>
-                      </a>
-                    </div>
-                    <div class="kt-menu-item">
-                      <a
-                        class="kt-menu-link py-2 px-2.5 rounded-md kt-menu-item-active:bg-secondary kt-menu-link-hover:bg-secondary"
-                        href="#"
-                        @click.prevent
-                      >
-                        <span
-                          class="kt-menu-title text-sm text-foreground kt-menu-item-active:font-medium kt-menu-item-active:text-mono kt-menu-link-hover:text-mono"
-                        >
-                          Shipping Info
-                        </span>
-                      </a>
-                    </div>
-                    <div class="kt-menu-item">
-                      <a
-                        class="kt-menu-link py-2 px-2.5 rounded-md kt-menu-item-active:bg-secondary kt-menu-link-hover:bg-secondary"
-                        href="#"
-                        @click.prevent
-                      >
-                        <span
-                          class="kt-menu-title text-sm text-foreground kt-menu-item-active:font-medium kt-menu-item-active:text-mono kt-menu-link-hover:text-mono"
-                        >
-                          Payment Method
-                        </span>
-                      </a>
-                    </div>
-                    <div class="kt-menu-item">
-                      <a
-                        class="kt-menu-link py-2 px-2.5 rounded-md kt-menu-item-active:bg-secondary kt-menu-link-hover:bg-secondary"
-                        href="#"
-                        @click.prevent
-                      >
-                        <span
-                          class="kt-menu-title text-sm text-foreground kt-menu-item-active:font-medium kt-menu-item-active:text-mono kt-menu-link-hover:text-mono"
-                        >
-                          Order Placed
-                        </span>
-                      </a>
-                    </div>
-                  </div>
-                </div>
-                <div class="kt-menu-item">
-                  <a
-                    class="kt-menu-link py-2 px-2.5 rounded-md kt-menu-item-active:bg-secondary kt-menu-link-hover:bg-secondary"
-                    href="#"
-                    @click.prevent
-                  >
-                    <span
-                      class="kt-menu-title text-sm text-foreground kt-menu-item-active:font-medium kt-menu-item-active:text-mono kt-menu-link-hover:text-mono"
-                    >
-                      My Orders
-                    </span>
-                  </a>
-                </div>
-                <div class="kt-menu-item">
-                  <a
-                    class="kt-menu-link py-2 px-2.5 rounded-md kt-menu-item-active:bg-secondary kt-menu-link-hover:bg-secondary"
-                    href="#"
-                    @click.prevent
-                  >
-                    <span
-                      class="kt-menu-title text-sm text-foreground kt-menu-item-active:font-medium kt-menu-item-active:text-mono kt-menu-link-hover:text-mono"
-                    >
-                      Order Receipt
-                    </span>
-                  </a>
-                </div>
-              </div>
-            </div>
-            <div class="kt-menu-item">
-              <a
-                class="kt-menu-link gap-2.5 py-2 px-2.5 rounded-md kt-menu-item-active:bg-accent/60 kt-menu-link-hover:bg-accent/60 !menu-item-here:bg-transparent"
-                href="#"
-                @click.prevent
-              >
-                <span
-                  class="kt-menu-icon items-start text-lg text-secondary-foreground kt-menu-item-active:text-mono kt-menu-item-here:text-mono"
-                >
-                  <i class="ki-filled ki-calendar-tick"> </i>
-                </span>
-                <span
-                  class="kt-menu-title text-sm text-foreground font-medium kt-menu-item-here:text-mono kt-menu-item-active:text-mono kt-menu-link-hover:text-mono"
-                >
-                  Project Planning
-                </span>
-              </a>
             </div>
           </div>
         </div>
         <!-- End of Primary Menu -->
         <!-- Secondary Menu -->
-        <div>
+        <!-- <div>
           <h3
             class="text-sm text-muted-foreground uppercase ps-5 inline-block mb-3"
           >
@@ -1581,16 +440,13 @@ const isMyAccountActive = computed(() => route.path.startsWith("/account"));
               </a>
             </div>
           </div>
-        </div>
+        </div> -->
         <!-- Secondary Menu -->
       </div>
     </div>
     <!-- End of Sidebar kt-menu-->
     <!-- Footer -->
-    <div
-      class="flex flex-center justify-between shrink-0 ps-4 pe-3.5 mb-3.5"
-      id="sidebar_footer"
-    >
+    <div class="flex flex-center justify-between shrink-0 ps-4 pe-3.5 mb-3.5" id="sidebar_footer">
       <!-- User -->
       <div
         data-kt-dropdown="true"
@@ -1616,9 +472,7 @@ const isMyAccountActive = computed(() => route.path.startsWith("/account"));
                 src="/media/avatars/300-2.png"
               />
               <div class="flex flex-col gap-1.5">
-                <span
-                  class="text-sm text-foreground font-semibold leading-none"
-                >
+                <span class="text-sm text-foreground font-semibold leading-none">
                   Cody Fisher
                 </span>
                 <a
@@ -1630,13 +484,9 @@ const isMyAccountActive = computed(() => route.path.startsWith("/account"));
                 </a>
               </div>
             </div>
-            <span
-              class="kt-badge kt-badge-sm kt-badge-primary kt-badge-outline"
-            >
-              Pro
-            </span>
+            <span class="kt-badge kt-badge-sm kt-badge-primary kt-badge-outline"> Pro </span>
           </div>
-          <ul class="kt-dropdown-menu-sub">
+          <!-- <ul class="kt-dropdown-menu-sub">
             <li>
               <div class="kt-dropdown-menu-separator"></div>
             </li>
@@ -1850,12 +700,11 @@ const isMyAccountActive = computed(() => route.path.startsWith("/account"));
             <li>
               <div class="kt-dropdown-menu-separator"></div>
             </li>
-          </ul>
+          </ul> -->
           <div class="px-2.5 pt-1.5 mb-2.5 flex flex-col gap-3.5">
             <div class="flex items-center gap-2 justify-between">
               <span class="flex items-center gap-2">
-                <i class="ki-filled ki-moon text-base text-muted-foreground">
-                </i>
+                <i class="ki-filled ki-moon text-base text-muted-foreground"> </i>
                 <span class="font-medium text-2sm"> Dark Mode </span>
               </span>
               <input
@@ -1867,27 +716,34 @@ const isMyAccountActive = computed(() => route.path.startsWith("/account"));
                 value="1"
               />
             </div>
-            <a
-              class="kt-btn kt-btn-outline justify-center w-full"
-              href="#"
-              @click.prevent
+            <button
+              class="kt-btn kt-btn-outline justify-center w-full" 
+              type="button"
+              :disabled="loggingOut"
+              @click="handleLogout"
             >
-              Log out
-            </a>
+                <template v-if="loggingOut">
+                    Cerrando sesión...
+                </template>
+
+                <template v-else>
+                    Cerrar sesión
+                </template>
+            </button>
           </div>
         </div>
       </div>
       <!-- End of User -->
       <div class="flex items-center gap-1.5">
         <!-- Notifications -->
-        <button
+        <!-- <button
           class="kt-btn kt-btn-ghost kt-btn-icon size-8 hover:bg-background hover:[&_i]:text-primary"
           data-kt-drawer-toggle="#notifications_drawer"
         >
           <i class="ki-filled ki-notification-status text-lg"> </i>
-        </button>
+        </button> -->
         <!--Notifications Drawer-->
-        <div
+        <!-- <div
           class="hidden kt-drawer kt-drawer-end card flex-col max-w-[90%] w-[450px] top-5 bottom-5 end-5 rounded-xl border border-border"
           data-kt-drawer="true"
           data-kt-drawer-container="body"
@@ -3571,7 +2427,7 @@ const isMyAccountActive = computed(() => route.path.startsWith("/account"));
               </button>
             </div>
           </div>
-        </div>
+        </div> -->
         <!--End of Notifications Drawer-->
         <!-- End of Notifications -->
         <a

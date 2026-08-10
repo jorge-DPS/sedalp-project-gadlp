@@ -1,8 +1,8 @@
 <script setup>
-import AppHeader from '@/components/layout/AppHeader.vue'
-import AppSidebar from '@/components/layout/AppSidebar.vue'
-import AppMain from '@/components/layout/AppMain.vue'
-import AppModals from '@/components/layout/AppModals.vue'
+import AppHeader from '@/layouts/components/header/AppHeader.vue'
+import AppSidebar from '@/layouts/components/sidebar/AppSidebar.vue'
+import AppMain from '@/layouts/components/main/AppMain.vue'
+import AppModals from '@/layouts/components/modals/AppModals.vue'
 </script>
 
 <template>

@@ -1,5 +1,5 @@
 <script setup>
-import AppFooter from '@/components/layout/AppFooter.vue'
+import AppFooter from '@/layouts/components/footer/AppFooter.vue'
 </script>
 
 <template>

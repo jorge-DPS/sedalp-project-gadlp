@@ -1,7 +1,7 @@
 <script setup>
 import { computed, ref } from 'vue'
-import AccessPageHeader from '@/components/access-control/AccessPageHeader.vue'
-import { initialUsers, professions, regions, staffRoles } from '@/modules/access-control/mock-data'
+import AccessPageHeader from '@/modules/access-control/components/AccessPageHeader.vue'
+import { initialUsers, professions, regions, staffRoles } from '@/modules/access-control/mocks/accessControlMock'
 
 const users = ref(initialUsers.map((user) => ({ ...user, regions: [...user.regions] })))
 const search = ref('')

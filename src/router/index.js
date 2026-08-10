@@ -1,58 +1,93 @@
 import { createRouter, createWebHistory } from 'vue-router'
+
 import DefaultLayout from '@/layouts/DefaultLayout.vue'
+
 import { reinitializeMetronic } from '@/utils/metronic'
+import { tokenService } from '@/modules/auth/services/tokenService'
+
+import authRoutes from '@/modules/auth/routes'
+import dashboardRoutes from '@/modules/dashboard/routes'
+import accessControlRoutes from '@/modules/access-control/routes'
+import accountRoutes from '@/modules/account/routes'
+import publicProfileRoutes from '@/modules/public-profile/routes'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
+
   routes: [
+    // Rutas públicas
+    ...authRoutes,
+
+    // Rutas protegidas
     {
       path: '/',
       component: DefaultLayout,
+
+      meta: {
+        requiresAuth: true,
+      },
+
       children: [
+        // Página inicial después del login
         {
           path: '',
-          name: 'dashboard',
-          component: () => import('@/views/DashboardView.vue'),
-          meta: { title: 'Dashboard' },
-        },
-        {
-          path: 'public-profile/profiles/default',
-          name: 'public-profile-default',
-          component: () => import('@/views/public-profile/PublicProfileDefaultView.vue'),
-          meta: {
-            title: 'Default',
+          redirect: {
+            name: 'users.index',
           },
         },
-        {
-          path: 'account/integrations',
-          name: 'account-integrations',
-          component: () => import('@/views/account/IntegrationsView.vue'),
-          meta: {
-            title: 'Integrations',
-          },
-        },
-        {
-          path: 'access-control/users',
-          name: 'user-management',
-          component: () => import('@/views/access-control/UserManagementView.vue'),
-          meta: { title: 'Administración de usuarios' },
-        },
-        {
-          path: 'access-control/roles',
-          name: 'role-management',
-          component: () => import('@/views/access-control/RoleManagementView.vue'),
-          meta: { title: 'Administración de roles' },
-        },
+
+        ...dashboardRoutes,
+        ...accessControlRoutes,
+        ...accountRoutes,
+        ...publicProfileRoutes,
       ],
     },
+
+    // Ruta inexistente
+    {
+      path: '/:pathMatch(.*)*',
+      redirect: '/',
+    },
   ],
+
   scrollBehavior() {
-    return { top: 0 }
+    return {
+      top: 0,
+    }
   },
 })
 
+router.beforeEach((to) => {
+  const loggedIn = tokenService.isAuthenticated()
+
+  const requiresAuth = to.matched.some(
+    (record) => record.meta.requiresAuth,
+  )
+
+  const guestOnly = to.matched.some(
+    (record) => record.meta.guestOnly,
+  )
+
+  // No autenticado -> login
+  if (requiresAuth && !loggedIn) {
+    return {
+      name: 'login',
+    }
+  }
+
+  // Ya autenticado -> no permitir volver al login
+  if (guestOnly && loggedIn) {
+    return {
+      name: 'users.index',
+    }
+  }
+
+  return true
+})
+
 router.afterEach((to) => {
-  document.title = `${to.meta.title ?? 'Metronic'} | Vue 3`
+  document.title = `${to.meta.title ?? 'Inicio'} | SEDALP`
+
   reinitializeMetronic()
 })
 
