@@ -29,10 +29,7 @@ export const tokenService = {
   },
 
   setUser(user) {
-    localStorage.setItem(
-      USER_KEY,
-      JSON.stringify(user),
-    )
+    localStorage.setItem(USER_KEY, JSON.stringify(user))
   },
 
   removeUser() {

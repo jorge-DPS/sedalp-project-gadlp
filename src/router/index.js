@@ -3,20 +3,22 @@ import { createRouter, createWebHistory } from 'vue-router'
 import DefaultLayout from '@/layouts/DefaultLayout.vue'
 
 import { reinitializeMetronic } from '@/utils/metronic'
-import { tokenService } from '@/modules/auth/services/tokenService'
-
-import authRoutes from '@/modules/auth/routes'
-import dashboardRoutes from '@/modules/dashboard/routes'
-import accessControlRoutes from '@/modules/access-control/routes'
-import accountRoutes from '@/modules/account/routes'
-import publicProfileRoutes from '@/modules/public-profile/routes'
+import { tokenService } from '@/services/tokenService'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
 
   routes: [
     // Rutas públicas
-    ...authRoutes,
+    {
+      path: '/login',
+      name: 'login',
+      component: () => import('@/views/auth/LoginView.vue'),
+      meta: {
+        title: 'Iniciar sesión',
+        guestOnly: true,
+      },
+    },
 
     // Rutas protegidas
     {
@@ -32,14 +34,57 @@ const router = createRouter({
         {
           path: '',
           redirect: {
-            name: 'users.index',
+            name: 'dashboard',
           },
         },
 
-        ...dashboardRoutes,
-        ...accessControlRoutes,
-        ...accountRoutes,
-        ...publicProfileRoutes,
+        {
+          path: 'dashboard',
+          name: 'dashboard',
+          component: () => import('@/views/dashboard/DashboardView.vue'),
+          meta: { title: 'Dashboard' },
+        },
+        {
+          path: 'usuarios',
+          name: 'users.index',
+          component: () => import('@/views/access-control/UserManagementView.vue'),
+          meta: {
+            title: 'Administrar usuarios',
+            breadcrumbs: ['Administración', 'Usuarios'],
+            permission: 'usuarios.ver',
+          },
+        },
+        {
+          path: 'roles',
+          name: 'roles.index',
+          component: () => import('@/views/access-control/RoleManagementView.vue'),
+          meta: {
+            title: 'Roles y permisos',
+            breadcrumbs: ['Administración', 'Roles'],
+            permission: 'roles.ver',
+          },
+        },
+        {
+          path: 'news',
+          name: 'news.index',
+          component: () => import('@/views/communication/NewsView.vue'),
+          meta: {
+            title: 'Noticias',
+            breadcrumbs: ['Comunicación', 'Noticias'],
+          }
+        },
+        {
+          path: 'account/integrations',
+          name: 'account-integrations',
+          component: () => import('@/views/account/IntegrationsView.vue'),
+          meta: { title: 'Integraciones' },
+        },
+        {
+          path: 'public-profile/profiles/default',
+          name: 'public-profile-default',
+          component: () => import('@/views/public-profile/PublicProfileDefaultView.vue'),
+          meta: { title: 'Perfil público' },
+        },
       ],
     },
 
@@ -60,13 +105,9 @@ const router = createRouter({
 router.beforeEach((to) => {
   const loggedIn = tokenService.isAuthenticated()
 
-  const requiresAuth = to.matched.some(
-    (record) => record.meta.requiresAuth,
-  )
+  const requiresAuth = to.matched.some((record) => record.meta.requiresAuth)
 
-  const guestOnly = to.matched.some(
-    (record) => record.meta.guestOnly,
-  )
+  const guestOnly = to.matched.some((record) => record.meta.guestOnly)
 
   // No autenticado -> login
   if (requiresAuth && !loggedIn) {
@@ -78,7 +119,7 @@ router.beforeEach((to) => {
   // Ya autenticado -> no permitir volver al login
   if (guestOnly && loggedIn) {
     return {
-      name: 'users.index',
+      name: 'dashboard',
     }
   }
 

@@ -2,8 +2,8 @@
 import { ref } from 'vue'
 import { useRouter } from 'vue-router'
 
-import { authService } from '@/modules/auth/services/authService'
-import { tokenService } from '@/modules/auth/services/tokenService'
+import { authService } from '@/services/authService'
+import { tokenService } from '@/services/tokenService'
 
 const router = useRouter()
 
@@ -40,9 +40,9 @@ const login = async () => {
       tokenService.setUser(user)
     }
 
-    // Después del login vamos a Administrar usuarios
+    // Después del login vamos al Dashboard
     await router.replace({
-      name: 'users.index',
+      name: 'dashboard',
     })
   } catch (err) {
     console.error('Error al iniciar sesión:', err)
@@ -79,19 +79,12 @@ const login = async () => {
     class="page-bg flex min-h-screen w-full items-center justify-center bg-center bg-no-repeat px-4"
   >
     <div class="kt-card w-full max-w-[370px]">
-      <form
-        class="kt-card-content flex flex-col gap-5 p-10"
-        @submit.prevent="login"
-      >
+      <form class="kt-card-content flex flex-col gap-5 p-10" @submit.prevent="login">
         <!-- Encabezado -->
         <div class="mb-2.5 text-center">
-          <h1 class="text-mono mb-2 text-xl font-semibold">
-            Iniciar sesión
-          </h1>
+          <h1 class="text-mono mb-2 text-xl font-semibold">Iniciar sesión</h1>
 
-          <p class="text-secondary-foreground text-sm">
-            Sistema de Información SEDALP
-          </p>
+          <p class="text-secondary-foreground text-sm">Sistema de Información SEDALP</p>
         </div>
 
         <!-- Mensaje de error -->
@@ -104,10 +97,7 @@ const login = async () => {
 
         <!-- Correo electrónico -->
         <div class="flex flex-col gap-1.5">
-          <label
-            for="email"
-            class="kt-form-label text-mono font-normal"
-          >
+          <label for="email" class="kt-form-label text-mono font-normal">
             Correo electrónico
           </label>
 
@@ -125,12 +115,7 @@ const login = async () => {
 
         <!-- Contraseña -->
         <div class="flex flex-col gap-1.5">
-          <label
-            for="password"
-            class="kt-form-label text-mono font-normal"
-          >
-            Contraseña
-          </label>
+          <label for="password" class="kt-form-label text-mono font-normal"> Contraseña </label>
 
           <div class="kt-input">
             <input
@@ -175,9 +160,7 @@ const login = async () => {
             Ingresando...
           </template>
 
-          <template v-else>
-            Iniciar sesión
-          </template>
+          <template v-else> Iniciar sesión </template>
         </button>
       </form>
     </div>

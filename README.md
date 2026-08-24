@@ -24,16 +24,24 @@ src/
 │   ├── metronic/        # Fuentes CSS/JS originales de Metronic
 │   └── main.css         # Punto de entrada de estilos de la aplicación
 ├── components/
-│   └── layout/          # Header, sidebar, footer y piezas reutilizables del layout
-├── layouts/             # Contenedores de páginas con RouterView
+│   └── ui/              # Componentes visuales reutilizables
+├── layouts/             # Layout global y sus componentes
+├── mocks/               # Datos simulados para desarrollo
 ├── router/              # Rutas y metadatos de navegación
+├── services/            # Cliente HTTP y servicios de la API
 ├── utils/               # Adaptadores e inicialización de librerías
-└── views/               # Páginas asociadas a rutas
+└── views/               # Páginas asociadas directamente a rutas
+    ├── access-control/
+    │   ├── RoleManagementView.vue
+    │   └── UserManagementView.vue
     ├── account/
     │   └── IntegrationsView.vue
+    ├── auth/
+    │   └── LoginView.vue
+    ├── dashboard/
+    │   └── DashboardView.vue
     ├── public-profile/
     │   └── PublicProfileDefaultView.vue
-    └── DashboardView.vue
 
 public/
 ├── css/                 # Bundles compilados de Metronic
@@ -46,7 +54,8 @@ public/
 
 - Una vista que sea destino de Vue Router pertenece a `src/views`.
 - Las vistas se agrupan por dominio cuando exista más de una sección funcional.
-- Los componentes compartidos pertenecen a `src/components`.
+- Los componentes visuales compartidos pertenecen a `src/components/ui`.
+- Los servicios y datos simulados no se guardan dentro de `views`; pertenecen a `src/services` y `src/mocks`.
 - Los contenedores que definen la estructura visual global pertenecen a `src/layouts`.
 - El código de Metronic se mantiene aislado en `src/assets/metronic`; no se mezcla con componentes de negocio.
 - Los imports internos usan el alias `@`, que apunta a `src`.

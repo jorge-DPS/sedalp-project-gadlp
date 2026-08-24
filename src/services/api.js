@@ -1,6 +1,6 @@
 import axios from 'axios'
 
-import { tokenService } from '@/modules/auth/services/tokenService'
+import { tokenService } from '@/services/tokenService'
 
 const api = axios.create({
   baseURL: import.meta.env.VITE_API_URL,

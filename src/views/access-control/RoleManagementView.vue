@@ -1,7 +1,7 @@
 <script setup>
 import { computed, ref } from 'vue'
-import AccessPageHeader from '@/modules/access-control/components/AccessPageHeader.vue'
-import { initialRoles, permissionCatalog } from '@/modules/access-control/mocks/accessControlMock'
+import AccessPageHeader from '@/components/ui/AccessPageHeader.vue'
+import { initialRoles, permissionCatalog } from '@/mocks/accessControlMock'
 
 const roles = ref(initialRoles.map((role) => ({ ...role, permissions: [...role.permissions] })))
 const editingRole = ref(null)
