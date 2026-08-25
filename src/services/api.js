@@ -2,6 +2,8 @@ import axios from 'axios'
 
 import { tokenService } from '@/services/tokenService'
 
+let unauthorizedHandler = null
+
 const api = axios.create({
   baseURL: import.meta.env.VITE_API_URL,
 
@@ -32,11 +34,16 @@ api.interceptors.response.use(
 
   (error) => {
     if (error.response?.status === 401) {
-      tokenService.clear()
+      if (unauthorizedHandler) unauthorizedHandler(error)
+      else tokenService.clear()
     }
 
     return Promise.reject(error)
   },
 )
+
+export function configureUnauthorizedHandler(handler) {
+  unauthorizedHandler = typeof handler === 'function' ? handler : null
+}
 
 export default api

@@ -1,52 +1,35 @@
 <script setup>
+import { storeToRefs } from 'pinia'
 import { ref } from 'vue'
 import { useRouter } from 'vue-router'
 
-import { authService } from '@/services/authService'
-import { tokenService } from '@/services/tokenService'
+import { useAuthStore } from '@/stores/auth'
 
 const router = useRouter()
+const authStore = useAuthStore()
+const { isAuthenticating: loading } = storeToRefs(authStore)
 
 const email = ref('')
 const password = ref('')
 const showPassword = ref(false)
 
-const loading = ref(false)
 const error = ref('')
 
 const login = async () => {
   if (loading.value) return
 
   error.value = ''
-  loading.value = true
-
   try {
-    const response = await authService.login({
+    await authStore.login({
       email: email.value,
       password: password.value,
     })
-
-    const { access_token, user } = response.data
-
-    if (!access_token) {
-      throw new Error('El servidor no devolvió el token de autenticación.')
-    }
-
-    // Guardamos el JWT
-    tokenService.setToken(access_token)
-
-    // Si Laravel devuelve el usuario, también lo guardamos
-    if (user) {
-      tokenService.setUser(user)
-    }
 
     // Después del login vamos al Dashboard
     await router.replace({
       name: 'dashboard',
     })
   } catch (err) {
-    console.error('Error al iniciar sesión:', err)
-
     if (err.response?.status === 401) {
       error.value = 'Correo electrónico o contraseña incorrectos.'
       return
@@ -68,8 +51,6 @@ const login = async () => {
     }
 
     error.value = 'Ocurrió un error al iniciar sesión.'
-  } finally {
-    loading.value = false
   }
 }
 </script>

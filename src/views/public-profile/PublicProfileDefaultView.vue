@@ -1,3 +1,103 @@
+<script setup>
+import { nextTick, onBeforeUnmount, onMounted, ref } from 'vue'
+
+import { loadMetronicScripts } from '@/utils/metronic'
+
+const contributionsChartElement = ref(null)
+let contributionsChart = null
+
+const initializeContributionsChart = async () => {
+  await loadMetronicScripts()
+  await nextTick()
+
+  const element = contributionsChartElement.value
+
+  if (!element || element.querySelector('.apexcharts-canvas')) {
+    return
+  }
+
+  contributionsChart = new window.ApexCharts(element, {
+    series: [44, 55, 41, 17, 15],
+    labels: ['ERP', 'HRM', 'DMS', 'CRM', 'DAM'],
+    colors: [
+      'var(--color-primary)',
+      'var(--color-destructive)',
+      'var(--color-green-500)',
+      'var(--color-violet-500)',
+      'var(--color-yellow-500)',
+    ],
+    fill: {
+      colors: [
+        'var(--color-primary)',
+        'var(--color-destructive)',
+        'var(--color-green-500)',
+        'var(--color-violet-500)',
+        'var(--color-yellow-500)',
+      ],
+    },
+    chart: {
+      type: 'donut',
+    },
+    stroke: {
+      show: true,
+      width: 2,
+      colors: 'var(--color-border)',
+    },
+    dataLabels: {
+      enabled: false,
+    },
+    plotOptions: {
+      pie: {
+        expandOnClick: false,
+      },
+    },
+    legend: {
+      offsetY: -10,
+      offsetX: -10,
+      fontSize: '13px',
+      fontWeight: '500',
+      itemMargin: {
+        vertical: 1,
+      },
+      labels: {
+        colors: 'var(--color-secondary-foreground)',
+        useSeriesColors: false,
+      },
+      markers: {
+        width: 8,
+        height: 8,
+      },
+    },
+    responsive: [
+      {
+        breakpoint: 480,
+        options: {
+          chart: {
+            width: 200,
+          },
+          legend: {
+            position: 'bottom',
+          },
+        },
+      },
+    ],
+  })
+
+  await contributionsChart.render()
+}
+
+onMounted(() => {
+  initializeContributionsChart().catch((error) => {
+    console.error('No se pudo inicializar el gráfico de contribuciones:', error)
+  })
+})
+
+onBeforeUnmount(() => {
+  contributionsChart?.destroy()
+  contributionsChart = null
+})
+</script>
+
 <template>
   <!-- Page toolbar -->
   <div class="pb-5">
@@ -1592,7 +1692,7 @@
                 </div>
               </div>
               <div class="kt-card-content flex justify-center items-center px-3 py-1">
-                <div id="contributions_chart"></div>
+                <div id="contributions_chart" ref="contributionsChartElement"></div>
               </div>
             </div>
           </div>

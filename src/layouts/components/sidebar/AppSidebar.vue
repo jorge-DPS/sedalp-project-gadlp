@@ -1,34 +1,32 @@
 <script setup>
-import { authService } from '@/services/authService'
-import { tokenService } from '@/services/tokenService'
-import { computed, ref } from 'vue'
+import { storeToRefs } from 'pinia'
+import { computed } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
+
+import { useAuthStore } from '@/stores/auth'
 
 const route = useRoute()
 const router = useRouter()
+const authStore = useAuthStore()
+const { currentUser, isLoggingOut: loggingOut, roles } = storeToRefs(authStore)
 
-const loggingOut = ref(false)
+const userName = computed(() => currentUser.value?.name ?? 'Usuario')
+const userEmail = computed(() => currentUser.value?.email ?? '')
+const userAvatar = computed(
+  () => currentUser.value?.avatar_url ?? currentUser.value?.avatar ?? '/media/avatars/blank.png',
+)
+const primaryRole = computed(() => roles.value[0] ?? 'Cuenta')
 
 const handleLogout = async () => {
   if (loggingOut.value) {
     return
   }
 
-  loggingOut.value = true
+  await authStore.logout()
 
-  try {
-    await authService.logout()
-  } catch (error) {
-    console.error('Error al cerrar sesión:', error)
-  } finally {
-    tokenService.clear()
-
-    await router.replace({
-      name: 'login',
-    })
-
-    loggingOut.value = false
-  }
+  await router.replace({
+    name: 'login',
+  })
 }
 
 const isPublicProfileActive = computed(() => route.path.startsWith('/public-profile'))
@@ -37,7 +35,7 @@ const isProfilesActive = computed(() => route.path.startsWith('/public-profile/p
 
 const isAdministrationActive = computed(() => ['users.index', 'roles.index'].includes(route.name))
 
-// const isMyAccountActive = computed(() => route.path.startsWith("/account"));
+const isMyAccountActive = computed(() => route.path.startsWith('/account'))
 </script>
 
 <template>
@@ -485,33 +483,35 @@ const isAdministrationActive = computed(() => ['users.index', 'roles.index'].inc
       >
         <div class="cursor-pointer shrink-0" data-kt-dropdown-toggle="true">
           <img
-            alt=""
+            :alt="userName"
             class="size-9 rounded-full border-2 border-mono/25 shrink-0 cursor-pointer"
-            src="/media/avatars/gray/5.png"
+            :src="userAvatar"
           />
         </div>
         <div class="kt-dropdown-menu w-[250px]" data-kt-dropdown-menu="true">
           <div class="flex items-center justify-between px-2.5 py-1.5 gap-1.5">
             <div class="flex items-center gap-2">
               <img
-                alt=""
+                :alt="userName"
                 class="size-9 shrink-0 rounded-full border-2 border-green-500"
-                src="/media/avatars/300-2.png"
+                :src="userAvatar"
               />
               <div class="flex flex-col gap-1.5">
                 <span class="text-sm text-foreground font-semibold leading-none">
-                  Cody Fisher
+                  {{ userName }}
                 </span>
                 <a
                   class="text-xs text-secondary-foreground hover:text-primary font-medium leading-none"
                   href="#"
                   @click.prevent
                 >
-                  c.fisher@gmail.com
+                  {{ userEmail }}
                 </a>
               </div>
             </div>
-            <span class="kt-badge kt-badge-sm kt-badge-primary kt-badge-outline"> Pro </span>
+            <span class="kt-badge kt-badge-sm kt-badge-primary kt-badge-outline">
+              {{ primaryRole }}
+            </span>
           </div>
           <!-- <ul class="kt-dropdown-menu-sub">
             <li>

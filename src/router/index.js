@@ -2,8 +2,9 @@ import { createRouter, createWebHistory } from 'vue-router'
 
 import DefaultLayout from '@/layouts/DefaultLayout.vue'
 
+import pinia from '@/stores'
+import { useAuthStore } from '@/stores/auth'
 import { reinitializeMetronic } from '@/utils/metronic'
-import { tokenService } from '@/services/tokenService'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -71,7 +72,7 @@ const router = createRouter({
           meta: {
             title: 'Noticias',
             breadcrumbs: ['Comunicación', 'Noticias'],
-          }
+          },
         },
         {
           path: 'account/integrations',
@@ -102,22 +103,26 @@ const router = createRouter({
   },
 })
 
-router.beforeEach((to) => {
-  const loggedIn = tokenService.isAuthenticated()
+router.beforeEach(async (to) => {
+  const authStore = useAuthStore(pinia)
+
+  if (!authStore.sessionInitialized) {
+    await authStore.initializeSession()
+  }
 
   const requiresAuth = to.matched.some((record) => record.meta.requiresAuth)
 
   const guestOnly = to.matched.some((record) => record.meta.guestOnly)
 
   // No autenticado -> login
-  if (requiresAuth && !loggedIn) {
+  if (requiresAuth && !authStore.isAuthenticated) {
     return {
       name: 'login',
     }
   }
 
   // Ya autenticado -> no permitir volver al login
-  if (guestOnly && loggedIn) {
+  if (guestOnly && authStore.isAuthenticated) {
     return {
       name: 'dashboard',
     }
