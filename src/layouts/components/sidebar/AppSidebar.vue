@@ -10,12 +10,14 @@ const router = useRouter()
 const authStore = useAuthStore()
 const { currentUser, isLoggingOut: loggingOut, roles } = storeToRefs(authStore)
 
-const userName = computed(() => currentUser.value?.name ?? 'Usuario')
+const userName = computed(() => currentUser.value?.displayName ?? 'Usuario')
 const userEmail = computed(() => currentUser.value?.email ?? '')
-const userAvatar = computed(
-  () => currentUser.value?.avatar_url ?? currentUser.value?.avatar ?? '/media/avatars/blank.png',
-)
+const userAvatar = computed(() => currentUser.value?.avatarUrl ?? '/media/avatars/blank.png')
 const primaryRole = computed(() => roles.value[0] ?? 'Cuenta')
+const canViewUsers = computed(() => authStore.hasPermission('users.view'))
+const canViewRoles = computed(() => authStore.hasPermission('roles.view'))
+const canViewNews = computed(() => authStore.hasPermission('news.view'))
+const canViewAdministration = computed(() => canViewUsers.value || canViewRoles.value)
 
 const handleLogout = async () => {
   if (loggingOut.value) {
@@ -34,6 +36,8 @@ const isPublicProfileActive = computed(() => route.path.startsWith('/public-prof
 const isProfilesActive = computed(() => route.path.startsWith('/public-profile/profiles'))
 
 const isAdministrationActive = computed(() => ['users.index', 'roles.index'].includes(route.name))
+
+const isCommunicationActive = computed(() => route.name === 'news.index')
 
 const isMyAccountActive = computed(() => route.path.startsWith('/account'))
 </script>
@@ -60,7 +64,7 @@ const isMyAccountActive = computed(() => route.path.startsWith('/account'))
             data-kt-menu-item-trigger="hover"
           >
             <div class="kt-menu-label cursor-pointer text-mono font-medium grow justify-between">
-              <span class="text-lg font-medium text-inverse grow"> Metronic </span>
+              <span class="text-lg font-medium text-inverse grow"> SEDALP </span>
               <div class="flex flex-col text-mono font-medium">
                 <span class="kt-menu-arrow">
                   <i class="ki-filled ki-up"> </i>
@@ -107,7 +111,7 @@ const isMyAccountActive = computed(() => route.path.startsWith('/account'))
           </div>
         </div>
       </div>
-      <div class="flex items-center gap-2.5 px-3.5">
+      <div v-if="false" class="flex items-center gap-2.5 px-3.5">
         <!-- Input -->
         <a
           class="kt-btn kt-btn-secondary text-white [&_i]:text-white justify-center min-w-49.5"
@@ -167,6 +171,7 @@ const isMyAccountActive = computed(() => route.path.startsWith('/account'))
 
             <!-- Administration -->
             <div
+              v-if="canViewAdministration"
               class="kt-menu-item"
               :class="{
                 here: isAdministrationActive,
@@ -201,23 +206,11 @@ const isMyAccountActive = computed(() => route.path.startsWith('/account'))
               </div>
 
               <div class="kt-menu-accordion gap-px ps-7" :class="{ show: isAdministrationActive }">
-                <div class="kt-menu-item" :class="{ active: route.name === 'roles.index' }">
-                  <RouterLink
-                    :to="{ name: 'roles.index' }"
-                    class="kt-menu-link py-2 px-2.5 rounded-md kt-menu-item-active:bg-secondary kt-menu-link-hover:bg-secondary"
-                  >
-                    <span class="kt-menu-icon text-muted-foreground">
-                      <i class="ki-filled ki-security-user"></i>
-                    </span>
-                    <span
-                      class="kt-menu-title text-sm text-foreground kt-menu-item-active:font-medium kt-menu-item-active:text-mono kt-menu-link-hover:text-mono"
-                    >
-                      Administración de roles
-                    </span>
-                  </RouterLink>
-                </div>
-
-                <div class="kt-menu-item" :class="{ active: route.name === 'users.index' }">
+                <div
+                  v-if="canViewUsers"
+                  class="kt-menu-item"
+                  :class="{ active: route.name === 'users.index' }"
+                >
                   <RouterLink
                     :to="{ name: 'users.index' }"
                     class="kt-menu-link py-2 px-2.5 rounded-md kt-menu-item-active:bg-secondary kt-menu-link-hover:bg-secondary"
@@ -228,8 +221,77 @@ const isMyAccountActive = computed(() => route.path.startsWith('/account'))
                     <span
                       class="kt-menu-title text-sm text-foreground kt-menu-item-active:font-medium kt-menu-item-active:text-mono kt-menu-link-hover:text-mono"
                     >
-                      Administración de usuarios
+                      Usuarios
                     </span>
+                  </RouterLink>
+                </div>
+
+                <div
+                  v-if="canViewRoles"
+                  class="kt-menu-item"
+                  :class="{ active: route.name === 'roles.index' }"
+                >
+                  <RouterLink
+                    :to="{ name: 'roles.index' }"
+                    class="kt-menu-link py-2 px-2.5 rounded-md kt-menu-item-active:bg-secondary kt-menu-link-hover:bg-secondary"
+                  >
+                    <span class="kt-menu-icon text-muted-foreground">
+                      <i class="ki-filled ki-security-user"></i>
+                    </span>
+                    <span
+                      class="kt-menu-title text-sm text-foreground kt-menu-item-active:font-medium kt-menu-item-active:text-mono kt-menu-link-hover:text-mono"
+                    >
+                      Roles y permisos
+                    </span>
+                  </RouterLink>
+                </div>
+              </div>
+            </div>
+
+            <!-- Communication -->
+            <div
+              v-if="canViewNews"
+              class="kt-menu-item"
+              :class="{ here: isCommunicationActive, show: isCommunicationActive }"
+              data-kt-menu-item-toggle="accordion"
+              data-kt-menu-item-trigger="click"
+            >
+              <div
+                class="kt-menu-link gap-2.5 py-2 px-2.5 kt-menu-item-here:bg-secondary kt-menu-item-show:bg-secondary kt-menu-link-hover:bg-secondary"
+              >
+                <span
+                  class="kt-menu-icon items-start text-muted-foreground text-lg kt-menu-item-here:text-mono kt-menu-item-show:text-mono kt-menu-link-hover:text-mono"
+                >
+                  <i class="ki-filled ki-messages"></i>
+                </span>
+                <span
+                  class="kt-menu-title text-sm text-foreground kt-menu-item-here:font-medium kt-menu-item-here:text-mono kt-menu-item-show:text-mono kt-menu-link-hover:text-mono"
+                  >Comunicación</span
+                >
+                <span
+                  class="kt-menu-arrow text-muted-foreground kt-menu-item-here:text-foreground kt-menu-item-show:text-foreground kt-menu-link-hover:text-foreground"
+                >
+                  <span class="inline-flex kt-menu-item-show:hidden"
+                    ><i class="ki-filled ki-down text-xs"></i
+                  ></span>
+                  <span class="hidden kt-menu-item-show:inline-flex"
+                    ><i class="ki-filled ki-up text-xs"></i
+                  ></span>
+                </span>
+              </div>
+              <div class="kt-menu-accordion gap-px ps-7" :class="{ show: isCommunicationActive }">
+                <div class="kt-menu-item" :class="{ active: route.name === 'news.index' }">
+                  <RouterLink
+                    :to="{ name: 'news.index' }"
+                    class="kt-menu-link py-2 px-2.5 rounded-md kt-menu-item-active:bg-secondary kt-menu-link-hover:bg-secondary"
+                  >
+                    <span class="kt-menu-icon text-muted-foreground"
+                      ><i class="ki-filled ki-notepad-edit"></i
+                    ></span>
+                    <span
+                      class="kt-menu-title text-sm text-foreground kt-menu-item-active:font-medium kt-menu-item-active:text-mono kt-menu-link-hover:text-mono"
+                      >Noticias</span
+                    >
                   </RouterLink>
                 </div>
               </div>
@@ -237,6 +299,7 @@ const isMyAccountActive = computed(() => route.path.startsWith('/account'))
 
             <!-- Public Profile -->
             <div
+              v-if="false"
               class="kt-menu-item"
               :class="{
                 here: isPublicProfileActive,
@@ -332,6 +395,7 @@ const isMyAccountActive = computed(() => route.path.startsWith('/account'))
               </div>
             </div>
             <div
+              v-if="false"
               class="kt-menu-item"
               :class="{
                 here: isMyAccountActive,

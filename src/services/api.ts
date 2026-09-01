@@ -1,15 +1,16 @@
-import axios from 'axios'
+import axios, { type AxiosError } from 'axios'
 
 import { tokenService } from '@/services/tokenService'
 
-let unauthorizedHandler = null
+type UnauthorizedHandler = (error: AxiosError) => void
+
+let unauthorizedHandler: UnauthorizedHandler | null = null
 
 const api = axios.create({
   baseURL: import.meta.env.VITE_API_URL,
 
   headers: {
     Accept: 'application/json',
-    'Content-Type': 'application/json',
   },
 
   timeout: 10000,
@@ -42,7 +43,7 @@ api.interceptors.response.use(
   },
 )
 
-export function configureUnauthorizedHandler(handler) {
+export function configureUnauthorizedHandler(handler: UnauthorizedHandler | null): void {
   unauthorizedHandler = typeof handler === 'function' ? handler : null
 }
 

@@ -3,103 +3,120 @@ import { defineStore } from 'pinia'
 
 import { authService } from '@/services/authService'
 import { tokenService } from '@/services/tokenService'
+import type {
+  AuthStaffMemberApiResponse,
+  AuthUser,
+  AuthUserApiResponse,
+  CatalogSummaryApiResponse,
+  LoginCredentials,
+} from '@/types/auth'
 
-function normalizeNames(values) {
-  if (!values) return []
-
-  const items = Array.isArray(values) ? values : [values]
-
-  return items
-    .map((item) => {
-      if (typeof item === 'string') return item
-
-      return item?.name ?? item?.slug ?? null
-    })
-    .filter(Boolean)
-}
-
-function extractUser(responseData) {
-  const responseBody = responseData?.data ?? responseData
-  const responseUser = responseBody?.user ?? responseBody
-
-  if (!responseUser || typeof responseUser !== 'object' || Array.isArray(responseUser)) return null
-
-  if (!responseBody?.user) return responseUser
+function mapCatalogSummary(value: CatalogSummaryApiResponse | null) {
+  if (!value) return null
 
   return {
-    ...responseUser,
-    roles: responseUser.roles ?? responseBody.roles,
-    permissions: responseUser.permissions ?? responseBody.permissions,
+    id: value.id,
+    name: value.name,
+  }
+}
+
+function mapStaffMember(value: AuthStaffMemberApiResponse | null) {
+  if (!value) return null
+
+  return {
+    id: value.id,
+    firstNames: value.first_names,
+    paternalSurname: value.paternal_surname,
+    maternalSurname: value.maternal_surname,
+    active: value.active,
+    organizationalUnit: mapCatalogSummary(value.organizational_unit),
+    position: mapCatalogSummary(value.position),
+    profession: mapCatalogSummary(value.profession),
+  }
+}
+
+function mapAuthUser(value: AuthUserApiResponse): AuthUser {
+  const staffMember = mapStaffMember(value.staff_member)
+  const displayName = staffMember
+    ? [staffMember.firstNames, staffMember.paternalSurname, staffMember.maternalSurname]
+        .filter(Boolean)
+        .join(' ')
+    : value.email
+
+  return {
+    id: value.id,
+    email: value.email,
+    accountStatus: value.account_status,
+    effectiveStatus: value.effective_status,
+    canAccess: value.can_access,
+    staffMember,
+    roles: [...value.roles],
+    permissions: [...value.permissions],
+    isSuperAdmin: value.is_super_admin,
+    displayName,
+    avatarUrl: null,
+    createdAt: value.created_at,
+    updatedAt: value.updated_at,
+    deletedAt: value.deleted_at,
   }
 }
 
 export const useAuthStore = defineStore('auth', () => {
   tokenService.removeLegacyUser()
 
-  const token = ref(tokenService.getToken())
-  const user = ref(null)
+  const token = ref<string | null>(tokenService.getToken())
+  const user = ref<AuthUser | null>(null)
   const sessionInitialized = ref(false)
   const isInitializing = ref(false)
   const isAuthenticating = ref(false)
   const isLoggingOut = ref(false)
 
-  let initializationPromise = null
+  let initializationPromise: Promise<boolean> | null = null
 
   const currentUser = computed(() => user.value)
   const isAuthenticated = computed(() => Boolean(token.value && user.value))
+  const roles = computed(() => user.value?.roles ?? [])
+  const permissions = computed(() => user.value?.permissions ?? [])
+  const isSuperAdmin = computed(() => user.value?.isSuperAdmin ?? false)
 
-  const roles = computed(() => {
-    const roleNames = [...normalizeNames(user.value?.roles), ...normalizeNames(user.value?.role)]
-
-    return [...new Set(roleNames)]
-  })
-
-  const permissions = computed(() => {
-    const directPermissions = normalizeNames(user.value?.permissions)
-    const rolePermissions = (Array.isArray(user.value?.roles) ? user.value.roles : []).flatMap(
-      (role) => normalizeNames(role?.permissions),
-    )
-
-    return [...new Set([...directPermissions, ...rolePermissions])]
-  })
-
-  function persistToken(value) {
+  function persistToken(value: string | null): void {
     token.value = value
 
     if (value) tokenService.setToken(value)
     else tokenService.removeToken()
   }
 
-  function persistUser(value) {
+  function persistUser(value: AuthUser | null): void {
     user.value = value
   }
 
-  function clearSession() {
+  function clearSession(): void {
     token.value = null
     user.value = null
     sessionInitialized.value = true
     tokenService.clear()
   }
 
-  async function fetchCurrentUser() {
+  async function fetchCurrentUser(): Promise<AuthUser | null> {
     if (!token.value) {
       persistUser(null)
       return null
     }
 
     const response = await authService.me()
-    const currentUserData = extractUser(response.data)
+    const responseUser = response.data.data
 
-    if (!currentUserData) {
+    if (!responseUser || typeof responseUser !== 'object' || Array.isArray(responseUser)) {
       throw new Error('El servidor no devolvió un usuario autenticado válido.')
     }
 
+    const currentUserData = mapAuthUser(responseUser)
     persistUser(currentUserData)
 
     return currentUserData
   }
 
-  async function initializeSession() {
+  async function initializeSession(): Promise<boolean> {
     if (sessionInitialized.value) return isAuthenticated.value
     if (initializationPromise) return initializationPromise
 
@@ -135,7 +152,7 @@ export const useAuthStore = defineStore('auth', () => {
     }
   }
 
-  async function login(credentials) {
+  async function login(credentials: LoginCredentials): Promise<AuthUser | null> {
     if (isAuthenticating.value) return null
 
     isAuthenticating.value = true
@@ -143,7 +160,7 @@ export const useAuthStore = defineStore('auth', () => {
 
     try {
       const response = await authService.login(credentials)
-      const { access_token: accessToken, user: loginUser } = response.data ?? {}
+      const { access_token: accessToken } = response.data
 
       if (!accessToken) {
         throw new Error('El servidor no devolvió el token de autenticación.')
@@ -151,8 +168,6 @@ export const useAuthStore = defineStore('auth', () => {
 
       receivedToken = true
       persistToken(accessToken)
-
-      if (loginUser) persistUser(loginUser)
 
       await fetchCurrentUser()
       sessionInitialized.value = true
@@ -167,7 +182,7 @@ export const useAuthStore = defineStore('auth', () => {
     }
   }
 
-  async function logout() {
+  async function logout(): Promise<void> {
     if (isLoggingOut.value) return
 
     isLoggingOut.value = true
@@ -182,19 +197,19 @@ export const useAuthStore = defineStore('auth', () => {
     }
   }
 
-  function hasRole(role) {
+  function hasRole(role: string): boolean {
     return roles.value.includes(role)
   }
 
-  function hasAnyRole(...roleNames) {
+  function hasAnyRole(...roleNames: Array<string | string[]>): boolean {
     return roleNames.flat().some((role) => hasRole(role))
   }
 
-  function hasPermission(permission) {
-    return permissions.value.includes(permission)
+  function hasPermission(permission: string): boolean {
+    return isSuperAdmin.value || permissions.value.includes(permission)
   }
 
-  function hasAnyPermission(...permissionNames) {
+  function hasAnyPermission(...permissionNames: Array<string | string[]>): boolean {
     return permissionNames.flat().some((permission) => hasPermission(permission))
   }
 
@@ -209,6 +224,7 @@ export const useAuthStore = defineStore('auth', () => {
     isAuthenticated,
     roles,
     permissions,
+    isSuperAdmin,
     login,
     logout,
     fetchCurrentUser,

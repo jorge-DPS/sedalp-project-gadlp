@@ -20,7 +20,6 @@ const router = createRouter({
         guestOnly: true,
       },
     },
-
     // Rutas protegidas
     {
       path: '/',
@@ -48,30 +47,31 @@ const router = createRouter({
         {
           path: 'usuarios',
           name: 'users.index',
-          component: () => import('@/views/access-control/UserManagementView.vue'),
+          component: () => import('@/modules/users/views/UserManagementView.vue'),
           meta: {
             title: 'Administrar usuarios',
             breadcrumbs: ['Administración', 'Usuarios'],
-            permission: 'usuarios.ver',
+            permission: 'users.view',
           },
         },
         {
           path: 'roles',
           name: 'roles.index',
-          component: () => import('@/views/access-control/RoleManagementView.vue'),
+          component: () => import('@/modules/access/views/RoleManagementView.vue'),
           meta: {
             title: 'Roles y permisos',
             breadcrumbs: ['Administración', 'Roles'],
-            permission: 'roles.ver',
+            permission: 'roles.view',
           },
         },
         {
           path: 'news',
           name: 'news.index',
-          component: () => import('@/views/communication/NewsView.vue'),
+          component: () => import('@/modules/news/views/NewsView.vue'),
           meta: {
             title: 'Noticias',
             breadcrumbs: ['Comunicación', 'Noticias'],
+            permission: 'news.view',
           },
         },
         {
@@ -125,6 +125,17 @@ router.beforeEach(async (to) => {
   if (guestOnly && authStore.isAuthenticated) {
     return {
       name: 'dashboard',
+    }
+  }
+
+  const requiredPermission = to.meta.permission
+
+  if (requiresAuth && requiredPermission && !authStore.hasPermission(requiredPermission)) {
+    return {
+      name: 'dashboard',
+      query: {
+        forbidden: '1',
+      },
     }
   }
 

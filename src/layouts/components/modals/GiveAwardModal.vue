@@ -61,7 +61,7 @@
          </div>
         </div>
         <select class="kt-select max-w-24" data-kt-select="true">
-         <option selected="">
+         <option :selected="true">
           Owner
          </option>
          <option>
@@ -88,7 +88,7 @@
          <option>
           Owner
          </option>
-         <option selected="">
+         <option :selected="true">
           Editor
          </option>
          <option>
@@ -115,7 +115,7 @@
          <option>
           Editor
          </option>
-         <option selected="">
+         <option :selected="true">
           Viewer
          </option>
         </select>

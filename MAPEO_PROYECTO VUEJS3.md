@@ -1,5 +1,155 @@
 # Mapeo técnico del proyecto SEDALP
 
+> **Versión vigente:** 1 de septiembre de 2026. Esta sección describe el estado actual del frontend después de establecer TypeScript gradual, cerrar el contrato de autenticación y conectar usuarios, roles/permisos y noticias con las API reales de Laravel. La auditoría anterior se conserva al final como referencia histórica.
+
+## 0. Estado vigente
+
+### Arquitectura y convenciones
+
+La aplicación continúa siendo una SPA de Vue 3 creada con Vite. El código propio se migra gradualmente a TypeScript con `allowJs: true` y `checkJs: false`; por tanto, los archivos JavaScript y los componentes Vue existentes siguen funcionando mientras la infraestructura nueva obtiene comprobación estática estricta.
+
+Las convenciones adoptadas son:
+
+- componentes Vue en `PascalCase`;
+- composables con nombres `useCamelCase`;
+- stores Pinia con nombres `useSomethingStore`;
+- variables y funciones en `camelCase`;
+- carpetas en minúsculas;
+- payloads y DTO de Laravel con las claves exactas del contrato HTTP;
+- modelos internos de Vue en `camelCase`.
+
+### Base TypeScript gradual
+
+- `jsconfig.json` fue reemplazado por `tsconfig.json`.
+- Se añadieron TypeScript `^6.0.3` y `vue-tsc` `^3.3.11` como dependencias de desarrollo.
+- El arranque ahora es `src/main.ts` y `index.html` carga `/src/main.ts`.
+- Existe el comando `npm run type-check`, que ejecuta `vue-tsc --noEmit`.
+- `src/env.d.ts` declara `VITE_API_URL` y los tipos de Vite.
+- La infraestructura propia migrada comprende `router/index.ts`, `services/api.ts`, `services/authService.ts`, `services/tokenService.ts`, `stores/index.ts` y `stores/auth.ts`.
+- Los nuevos módulos de usuarios, acceso y noticias están escritos en TypeScript; las vistas heredadas de Metronic continúan en JavaScript y se migrarán únicamente cuando sean intervenidas.
+
+### Contrato vigente de autenticación
+
+`authService` declara explícitamente:
+
+| Método | Endpoint | Resultado esperado |
+| --- | --- | --- |
+| `POST` | `/auth/login` | `message`, `access_token`, `token_type`, `expires_in` |
+| `GET` | `/auth/me` | recurso JSON bajo `data` con usuario, personal, roles y permisos |
+| `POST` | `/auth/logout` | mensaje de cierre de sesión |
+| `POST` | `/auth/refresh` | nuevo `access_token`, `token_type` y `expires_in` |
+
+Los DTO del backend están tipados en `src/types/auth.ts` con sus claves reales en `snake_case`. El store transforma una sola vez `/auth/me` al modelo interno `AuthUser` en `camelCase`. El nombre visible se compone con nombres y apellidos del `staff_member`; una cuenta técnica sin personal utiliza el correo.
+
+La sesión se inicializa así:
+
+```text
+localStorage access_token
+        ↓
+GET /auth/me
+        ↓
+AuthUser interno camelCase
+        ↓
+roles y permissions de Pinia
+```
+
+El login ya no espera un usuario dentro de su propia respuesta: guarda el token y consulta inmediatamente `/auth/me`, conforme al contrato real de Laravel. Una respuesta `401` limpia la sesión local; el refresh automático continúa deliberadamente pendiente.
+
+### Autorización del router
+
+La guarda global aplica ahora `meta.permission`, además de `requiresAuth` y `guestOnly`. Los permisos alineados con Laravel son:
+
+| Ruta | Permiso |
+| --- | --- |
+| `/usuarios` | `users.view` |
+| `/roles` | `roles.view` |
+| `/news` | `news.view` |
+
+Si un usuario autenticado carece del permiso, el router lo devuelve a `dashboard` con `forbidden=1`. `hasPermission()` admite el bypass interno de `isSuperAdmin`, mientras que `hasRole()` conserva la semántica estricta de pertenencia a un rol. Laravel sigue siendo la autoridad final y vuelve a comprobar todos los permisos en el servidor.
+
+### Verificación vigente
+
+- `npm run type-check`: correcto, sin errores.
+- `npm run build` sobre una salida temporal aislada: correcto, 166 módulos transformados.
+- El build ordinario no pudo limpiar el `dist/assets` preexistente porque Windows lo mantenía bloqueado; la compilación aislada confirmó que el código genera el bundle correctamente y la carpeta temporal fue eliminada después.
+- Al habilitar `vue-tsc` se corrigieron atributos booleanos HTML inválidos en tres modales heredados (`GiveAwardModal`, `ShareProfileModal` y `ReportUserModal`).
+- La prueba en navegador confirmó que `/usuarios`, `/roles` y `/news` redirigen a `/login` sin sesión y que no aparecen errores ni advertencias de consola.
+- No se ejecutaron mutaciones autenticadas contra Laravel porque no se proporcionaron credenciales de prueba; esa validación de integración continúa pendiente.
+
+### Módulos conectados con Laravel
+
+La lógica nueva se organiza por dominio y separa contrato, API, store, componentes y vista:
+
+```text
+src/
+├── modules/
+│   ├── access/{api,stores,types,views}/
+│   ├── users/{api,components,stores,types,views}/
+│   └── news/{api,components,stores,types,views}/
+├── shared/api/{errors,types}.ts
+├── services/api.ts
+└── components/ui/
+```
+
+#### Usuarios
+
+`src/modules/users/` consume el contrato `/admin/users` de Laravel:
+
+- listado paginado y filtros por búsqueda, rol, estado y unidad organizacional;
+- creación coordinada de cuenta y `staff_member` con nombres, apellidos, CI, unidad, cargo y profesión;
+- edición de los campos expuestos por `UserResource`;
+- asignación de rol mediante el endpoint dedicado `PUT /admin/users/{user}/role`;
+- activación o suspensión con motivo mediante `PATCH /admin/users/{user}/status`;
+- eliminación lógica con motivo, papelera y restauración;
+- catálogos reales de roles, unidades organizacionales, cargos y profesiones.
+
+Los mocks de acceso, las vistas simuladas y los antiguos `userService.js`/`roleService.js` fueron eliminados. Los payloads conservan las claves `snake_case` exigidas por Laravel y el frontend no envía campos que el recurso de edición no expone.
+
+#### Roles y permisos
+
+`src/modules/access/` consulta `/admin/access/roles` y `/admin/access/permissions`. La pantalla muestra el catálogo y la matriz efectiva en modo de solo lectura porque el backend actual no expone CRUD administrativo de roles. No se simulan operaciones inexistentes.
+
+#### Noticias
+
+`src/modules/news/` implementa:
+
+- listado, búsqueda, filtro por estado y paginación;
+- creación y edición con documento JSON de contenido;
+- estados `draft`, `published` y `archived`, respetando `news.publish`;
+- eliminación lógica, papelera, restauración y eliminación física para quien tenga los permisos correspondientes;
+- imágenes: alta multipart, edición de metadatos, eliminación y reordenamiento;
+- videos de YouTube: alta, edición, eliminación y reordenamiento.
+
+El alta separa explícitamente el contenido de sus medios. El asistente valida contenido y revisión, crea primero la noticia como `draft` y, después de recibir de Laravel el ID real, abre automáticamente el administrador multimedia. La publicación se realiza posteriormente desde la edición, evitando exponer una noticia incompleta si falla una carga. El administrador multimedia admite hasta 10 imágenes por operación mediante selección múltiple, genera `Imagen 1`, `Imagen 2`, etc. como texto alternativo inicial editable y conserva la edición, eliminación y reordenamiento de imágenes y videos ya guardados.
+
+El listado administrativo usa tarjetas responsive en lugar de tabla. Cada tarjeta muestra portada o estado vacío, estado de publicación, fecha, responsable, título, resumen, slug, cantidades de imágenes y videos, y las acciones autorizadas. Las pestañas `Noticias` y `Papelera` comparten la cabecera con el botón `Nueva noticia` alineado a la derecha; búsqueda, filtro, estados de carga, vacío y paginación se mantienen conectados con Laravel.
+
+El recurso de noticias mantiene las claves camelCase que Laravel ya devuelve (`publishedAt`, `createdAt`, `images`, `videos`); los payloads enviados usan las claves exactas del backend (`published_at`, `youtube_url`).
+
+#### Sidebar y autorización visual
+
+El menú principal queda ordenado como:
+
+1. `Administración / Usuarios`;
+2. `Administración / Roles y permisos`;
+3. `Comunicación / Noticias`.
+
+Cada grupo y enlace se muestra según `users.view`, `roles.view` o `news.view`. Las acciones de crear, editar, publicar, suspender, eliminar, restaurar y eliminar definitivamente también se ocultan cuando `/auth/me` no incluye su permiso. Laravel continúa siendo la autoridad final de autorización.
+
+### Pendientes después de esta etapa
+
+1. Probar el CRUD autenticado completo contra una instancia real de Laravel con credenciales y base de datos preparadas, incluidas respuestas `403`, `422` y `429`.
+2. Confirmar en integración real la URL pública generada por el disco de medios y el procesamiento de imágenes/colas.
+3. Decidir posteriormente el refresh automático y la sincronización de sesión entre pestañas.
+4. Añadir pruebas automatizadas de stores, servicios y componentes; el proyecto todavía no tiene un runner de pruebas propio.
+5. Sustituir, cuando se defina el alcance editorial, el textarea de contenido por un editor enriquecido compatible con el documento JSON de Laravel.
+6. Retirar progresivamente las rutas y grandes bloques visuales restantes del demo de Metronic que no pertenecen al alcance actual.
+
+<details>
+<summary>Auditoría histórica anterior a la migración gradual</summary>
+
+La información siguiente documenta el estado previo y puede contener rutas, extensiones o pendientes que ya fueron corregidos en la sección vigente.
+
 ## 1. Alcance del análisis
 
 Este documento describe la estructura, arquitectura, áreas funcionales, rutas, estado, persistencia y flujos observados en el repositorio. El análisis se actualizó sobre la rama `main`, partiendo del commit `1aaea72` (`features: restructuracion de archivos segun las mejores practicas`) y un árbol de trabajo limpio. El inventario se obtuvo con `git ls-files --cached --others --exclude-standard` y se filtró a rutas existentes, por lo que solamente se analizaron archivos rastreados por Git o archivos no ignorados.
@@ -320,3 +470,5 @@ La compilación exitosa valida sintaxis, resolución de imports y generación de
 | Recursos estáticos sin procesar      | `public/`                |
 
 La dirección arquitectónica adoptada centraliza las rutas, separa las vistas de la lógica auxiliar y reserva `components/ui` para piezas compartidas. El orden recomendado para continuar es: corregir los destinos del dashboard y las referencias del sidebar; definir autorización y ciclo de vida del token; conectar usuarios y roles con sus servicios; completar noticias; y retirar progresivamente el contenido de demostración de Metronic.
+
+</details>

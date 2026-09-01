@@ -35,7 +35,7 @@
       </div>
       <div class="flex flex-col gap-3.5">
        <label class="kt-form-label flex items-center gap-2.5">
-        <input checked="" class="kt-radio radio-sm" name="report-option" type="radio" value="1"/>
+        <input :checked="true" class="kt-radio radio-sm" name="report-option" type="radio" value="1"/>
         <div class="flex flex-col gap-0.5">
          <div class="text-sm font-semibold text-mono">
           Impersonation
@@ -46,7 +46,7 @@
         </div>
        </label>
        <label class="kt-form-label flex items-center gap-2.5">
-        <input checked="" class="kt-radio radio-sm" name="report-option" type="radio" value="2"/>
+        <input class="kt-radio radio-sm" name="report-option" type="radio" value="2"/>
         <div class="flex flex-col gap-0.5">
          <div class="text-sm font-semibold text-mono">
           Spammy
@@ -57,7 +57,7 @@
         </div>
        </label>
        <label class="kt-form-label flex items-center gap-2.5">
-        <input checked="" class="kt-radio radio-sm" name="report-option" type="radio" value="3"/>
+        <input class="kt-radio radio-sm" name="report-option" type="radio" value="3"/>
         <div class="flex flex-col gap-0.5">
          <div class="text-sm font-semibold text-mono">
           Off bumble behavior
@@ -68,7 +68,7 @@
         </div>
        </label>
        <label class="kt-form-label flex items-center gap-2.5">
-        <input checked="" class="kt-radio radio-sm" name="report-option" type="radio" value="4"/>
+        <input class="kt-radio radio-sm" name="report-option" type="radio" value="4"/>
         <div class="flex flex-col gap-0.5">
          <div class="text-sm font-semibold text-mono">
           Something else

@@ -5,7 +5,7 @@ import { useRoute } from 'vue-router'
 defineProps({
   title: { type: String, required: true },
   description: { type: String, required: true },
-  actionLabel: { type: String, required: true },
+  actionLabel: { type: String, default: '' },
   actionIcon: { type: String, default: 'ki-plus' },
 })
 
@@ -33,7 +33,12 @@ const breadcrumbs = computed(() => route.meta.breadcrumbs ?? [currentPage.value]
 
         <p class="text-sm text-secondary-foreground">{{ description }}</p>
       </div>
-      <button class="kt-btn kt-btn-primary" type="button" @click="$emit('action')">
+      <button
+        v-if="actionLabel"
+        class="kt-btn kt-btn-primary"
+        type="button"
+        @click="$emit('action')"
+      >
         <i class="ki-filled" :class="actionIcon"></i>
         {{ actionLabel }}
       </button>

@@ -6,6 +6,7 @@
   "scripts": {
     "dev": "vite",
     "build": "vite build",
+    "type-check": "vue-tsc --noEmit",
     "preview": "vite preview",
     "format": "prettier --write --experimental-cli src/"
   },
@@ -23,8 +24,10 @@
   "devDependencies": {
     "@vitejs/plugin-vue": "^6.0.8",
     "prettier": "3.9.5",
+    "typescript": "^6.0.3",
     "vite": "^8.1.5",
-    "vite-plugin-vue-devtools": "^8.1.5"
+    "vite-plugin-vue-devtools": "^8.1.5",
+    "vue-tsc": "^3.3.11"
   },
   "engines": {
     "node": "^22.18.0 || >=24.12.0"
