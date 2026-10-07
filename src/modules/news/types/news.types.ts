@@ -34,7 +34,6 @@ export interface News {
   title: string
   subtitle: string | null
   excerpt: string
-  description: string
   content: NewsContentNode
   publishedAt: string | null
   status: NewsStatus
@@ -58,7 +57,6 @@ export interface NewsPayload {
   title: string
   subtitle: string | null
   excerpt: string
-  description: string
   content: NewsContentNode
   status: NewsStatus
   published_at: string | null

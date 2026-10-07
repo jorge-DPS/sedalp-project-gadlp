@@ -34,7 +34,6 @@ const form = reactive({
   title: '',
   subtitle: '',
   excerpt: '',
-  description: '',
   body: '',
   status: 'draft' as NewsStatus,
   publishedAt: '',
@@ -82,7 +81,6 @@ function resetForm(): void {
   form.title = props.news?.title ?? ''
   form.subtitle = props.news?.subtitle ?? ''
   form.excerpt = props.news?.excerpt ?? ''
-  form.description = props.news?.description ?? ''
   form.body = originalBody
   form.status = props.news?.status ?? 'draft'
   form.publishedAt = props.news?.publishedAt ?? ''
@@ -122,9 +120,9 @@ function validateStep(step: number): boolean {
 
   if (
     step === 0 &&
-    (!form.title.trim() || !form.excerpt.trim() || !form.description.trim() || !form.body.trim())
+    (!form.title.trim() || !form.excerpt.trim() || !form.body.trim())
   ) {
-    validationError.value = 'Completa el título, resumen, descripción y contenido para continuar.'
+    validationError.value = 'Completa el título, resumen y contenido para continuar.'
     return false
   }
 
@@ -172,7 +170,6 @@ function submit(): void {
     title: form.title.trim(),
     subtitle: form.subtitle.trim() || null,
     excerpt: form.excerpt.trim(),
-    description: form.description.trim(),
     content,
     status,
     published_at: status === 'published' ? form.publishedAt || null : null,
@@ -342,7 +339,7 @@ function submit(): void {
                   placeholder="Añade contexto adicional al título"
                 />
               </div>
-              <div class="flex flex-col gap-2">
+              <div class="flex flex-col gap-2 md:col-span-2">
                 <div class="flex items-center justify-between gap-3">
                   <label class="text-sm font-medium text-mono" for="news_excerpt"
                     >Resumen <span class="text-destructive">*</span></label
@@ -360,20 +357,6 @@ function submit(): void {
                 ></textarea>
                 <span v-if="fieldError('excerpt')" class="text-xs text-destructive">{{
                   fieldError('excerpt')
-                }}</span>
-              </div>
-              <div class="flex flex-col gap-2">
-                <label class="text-sm font-medium text-mono" for="news_description"
-                  >Descripción <span class="text-destructive">*</span></label
-                >
-                <textarea
-                  id="news_description"
-                  v-model="form.description"
-                  class="kt-input min-h-32 resize-y py-3 leading-6"
-                  placeholder="Descripción requerida por el contrato actual"
-                ></textarea>
-                <span v-if="fieldError('description')" class="text-xs text-destructive">{{
-                  fieldError('description')
                 }}</span>
               </div>
               <div class="flex flex-col gap-2 md:col-span-2">
