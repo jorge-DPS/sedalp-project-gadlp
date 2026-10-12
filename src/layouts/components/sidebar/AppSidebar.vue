@@ -248,6 +248,13 @@ const isMyAccountActive = computed(() => route.path.startsWith('/account'))
               </div>
             </div>
 
+            <div v-if="authStore.hasPermission('regions.view')" class="kt-menu-item" :class="{ active: route.name === 'maps.index' }">
+              <RouterLink :to="{ name: 'maps.index' }" class="kt-menu-link gap-2.5 py-2 px-2.5 rounded-md kt-menu-item-active:bg-secondary kt-menu-link-hover:bg-secondary">
+                <span class="kt-menu-icon text-lg text-muted-foreground"><i class="ki-filled ki-geolocation" aria-hidden="true"></i></span>
+                <span class="kt-menu-title text-sm text-foreground kt-menu-item-active:font-medium">Mapas</span>
+              </RouterLink>
+            </div>
+
             <!-- Communication -->
             <div
               v-if="canViewNews"

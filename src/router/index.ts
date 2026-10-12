@@ -30,6 +30,16 @@ const router = createRouter({
       },
 
       children: [
+        {
+          path: 'mapas',
+          name: 'maps.index',
+          component: () => import('@/modules/maps/views/MapManagementView.vue'),
+          meta: {
+            title: 'Mapas',
+            breadcrumbs: ['Cartografía', 'Mapas'],
+            permission: 'regions.view',
+          },
+        },
         // Página inicial después del login
         {
           path: '',
