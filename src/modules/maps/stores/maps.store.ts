@@ -1,31 +1,37 @@
 import { defineStore } from 'pinia'
-import { ref, shallowRef } from 'vue'
-import { mapsApi } from '@/modules/maps/api/maps.api'
-import type { MapRegion, RegionBoundary } from '@/modules/maps/types/maps.types'
-import type { PaginationMeta } from '@/shared/api/types'
+import { computed, ref, shallowRef } from 'vue'
+import { mapsApi } from '../api/maps.api'
+import type { RegionBoundary } from '../types/maps.types'
 
 export const useMapsStore = defineStore('maps', () => {
-  const regions = ref<MapRegion[]>([])
-  const meta = ref<PaginationMeta | null>(null)
-  const boundary = shallowRef<RegionBoundary | null>(null)
+  const boundaries = shallowRef<RegionBoundary[]>([])
+  const hiddenIds = ref<number[]>([])
+  const visibleIds = computed(() =>
+    boundaries.value
+      .map((item) => item.properties.region_id)
+      .filter((id) => !hiddenIds.value.includes(id)),
+  )
 
-  async function fetchRegions(search: string, page: number, signal: AbortSignal): Promise<void> {
-    const response = await mapsApi.regions(search, page, signal)
+  async function fetchBoundaries(signal: AbortSignal): Promise<void> {
+    const response = await mapsApi.boundaries(signal)
     if (signal.aborted) return
-    regions.value = response.data
-    meta.value = response.meta
+    boundaries.value = response.features
+    const available = new Set(response.features.map((item) => item.properties.region_id))
+    hiddenIds.value = hiddenIds.value.filter((id) => available.has(id))
   }
 
-  async function fetchBoundary(regionId: number, signal: AbortSignal): Promise<void> {
-    const response = await mapsApi.boundary(regionId, signal)
-    if (!signal.aborted) boundary.value = response
+  function setVisible(id: number, visible: boolean): void {
+    hiddenIds.value = hiddenIds.value.filter((hidden) => hidden !== id)
+    if (!visible) hiddenIds.value.push(id)
   }
 
-  function clear(): void {
-    regions.value = []
-    meta.value = null
-    boundary.value = null
+  function showAll(): void {
+    hiddenIds.value = []
   }
 
-  return { regions, meta, boundary, fetchRegions, fetchBoundary, clear }
+  function hideAll(): void {
+    hiddenIds.value = boundaries.value.map((item) => item.properties.region_id)
+  }
+
+  return { boundaries, visibleIds, fetchBoundaries, setVisible, showAll, hideAll }
 })

@@ -4,6 +4,7 @@ import { computed } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 
 import { useAuthStore } from '@/stores/auth'
+import CartographyNavigation from './CartographyNavigation.vue'
 
 const route = useRoute()
 const router = useRouter()
@@ -44,7 +45,7 @@ const isMyAccountActive = computed(() => route.path.startsWith('/account'))
 
 <template>
   <div
-    class="flex-col fixed top-0 bottom-0 z-20 hidden lg:flex items-stretch shrink-0 w-(--sidebar-width) dark [--kt-drawer-enable:true] lg:[--kt-drawer-enable:false]"
+    class="flex-col fixed top-0 bottom-0 z-20 hidden bg-zinc-950 lg:flex items-stretch shrink-0 w-(--sidebar-width) dark [--kt-drawer-enable:true] lg:[--kt-drawer-enable:false]"
     data-kt-drawer="true"
     data-kt-drawer-class="kt-drawer kt-drawer-start flex top-0 bottom-0"
     id="sidebar"
@@ -248,12 +249,7 @@ const isMyAccountActive = computed(() => route.path.startsWith('/account'))
               </div>
             </div>
 
-            <div v-if="authStore.hasPermission('regions.view')" class="kt-menu-item" :class="{ active: route.name === 'maps.index' }">
-              <RouterLink :to="{ name: 'maps.index' }" class="kt-menu-link gap-2.5 py-2 px-2.5 rounded-md kt-menu-item-active:bg-secondary kt-menu-link-hover:bg-secondary">
-                <span class="kt-menu-icon text-lg text-muted-foreground"><i class="ki-filled ki-geolocation" aria-hidden="true"></i></span>
-                <span class="kt-menu-title text-sm text-foreground kt-menu-item-active:font-medium">Mapas</span>
-              </RouterLink>
-            </div>
+            <CartographyNavigation />
 
             <!-- Communication -->
             <div

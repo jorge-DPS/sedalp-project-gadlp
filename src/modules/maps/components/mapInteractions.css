@@ -1,0 +1,13 @@
+.regional-map path.leaflet-interactive:focus,
+.map-preview path.leaflet-interactive:focus {
+  outline: none;
+  stroke-width: 4;
+}
+
+.regional-map path.region-polygon:hover,
+.regional-map path.region-polygon:focus,
+.map-preview path.region-polygon:hover,
+.map-preview path.region-polygon:focus {
+  stroke-width: 4;
+  fill-opacity: 0.32;
+}

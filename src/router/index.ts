@@ -31,12 +31,18 @@ const router = createRouter({
 
       children: [
         {
+          path: 'mapas/capas',
+          name: 'maps.layers',
+          component: () => import('@/modules/maps/views/MapLayersView.vue'),
+          meta: { title: 'Gestión de capas', breadcrumbs: ['Cartografía', 'Gestión de capas'], permission: 'maps.view' },
+        },
+        {
           path: 'mapas',
           name: 'maps.index',
           component: () => import('@/modules/maps/views/MapManagementView.vue'),
           meta: {
-            title: 'Mapas',
-            breadcrumbs: ['Cartografía', 'Mapas'],
+            title: 'Visor general',
+            breadcrumbs: ['Cartografía', 'Visor general'],
             permission: 'regions.view',
           },
         },

@@ -1,246 +1,224 @@
 <script setup lang="ts">
+import { computed, nextTick, onBeforeUnmount, onMounted, ref } from 'vue'
 import { storeToRefs } from 'pinia'
-import { computed, onBeforeUnmount, onMounted, ref } from 'vue'
-import AccessPageHeader from '@/components/ui/AccessPageHeader.vue'
-import MapPreview from '@/modules/maps/components/MapPreview.vue'
-import { useMapsStore } from '@/modules/maps/stores/maps.store'
-import type { MapRegion } from '@/modules/maps/types/maps.types'
+import MapsPageHeader from '../components/MapsPageHeader.vue'
+import RegionalMap from '../components/RegionalMap.vue'
+import { regionColor } from '../components/regionColors'
+import { useMapsStore } from '../stores/maps.store'
+import { useAuthStore } from '@/stores/auth'
 import { getApiError } from '@/shared/api/errors'
 
 const store = useMapsStore()
-const { regions, meta, boundary } = storeToRefs(store)
+const auth = useAuthStore()
+const { boundaries, visibleIds } = storeToRefs(store)
+const map = ref<InstanceType<typeof RegionalMap>>()
 const search = ref('')
-const selected = ref<MapRegion | null>(null)
-const loadingRegions = ref(false)
-const loadingBoundary = ref(false)
-const listError = ref('')
-const boundaryError = ref('')
-const missingBoundary = ref(false)
-let listRequest: AbortController | null = null
-let boundaryRequest: AbortController | null = null
-
-const updatedAt = computed(() => {
-  const value = boundary.value?.properties.updated_at
-  if (!value) return 'Sin fecha registrada'
-  const date = new Date(value)
-  return Number.isNaN(date.getTime())
-    ? 'Sin fecha registrada'
-    : new Intl.DateTimeFormat('es-BO', { dateStyle: 'medium' }).format(date)
+const selectedId = ref<number>()
+const loading = ref(false)
+const error = ref('')
+let request: AbortController | undefined
+const filtered = computed(() => {
+  const query = search.value.trim().toLocaleLowerCase('es')
+  return boundaries.value.filter((item) =>
+    (item.properties.name + ' ' + (item.properties.code ?? ''))
+      .toLocaleLowerCase('es')
+      .includes(query),
+  )
 })
 
-async function selectRegion(region: MapRegion): Promise<void> {
-  boundaryRequest?.abort()
-  const request = new AbortController()
-  boundaryRequest = request
-  selected.value = region
-  boundary.value = null
-  boundaryError.value = ''
-  missingBoundary.value = false
-  loadingBoundary.value = true
+async function load(): Promise<void> {
+  request?.abort()
+  const controller = new AbortController()
+  request = controller
+  loading.value = true
+  error.value = ''
   try {
-    await store.fetchBoundary(region.id, request.signal)
-  } catch (error) {
-    if (request.signal.aborted) return
-    const failure = getApiError(error)
-    if (failure.status === 404) missingBoundary.value = true
-    else boundaryError.value = failure.message
+    await store.fetchBoundaries(controller.signal)
+  } catch (failure) {
+    if (!controller.signal.aborted) error.value = getApiError(failure).message
   } finally {
-    if (!request.signal.aborted) loadingBoundary.value = false
+    if (!controller.signal.aborted) loading.value = false
   }
 }
-
-async function loadRegions(page = 1): Promise<void> {
-  listRequest?.abort()
-  const request = new AbortController()
-  listRequest = request
-  loadingRegions.value = true
-  listError.value = ''
-  try {
-    await store.fetchRegions(search.value, page, request.signal)
-    if (!request.signal.aborted && !selected.value && regions.value[0]) {
-      void selectRegion(regions.value[0])
-    }
-  } catch (error) {
-    if (!request.signal.aborted) listError.value = getApiError(error).message
-  } finally {
-    if (!request.signal.aborted) loadingRegions.value = false
-  }
+async function focusRegion(id: number): Promise<void> {
+  store.setVisible(id, true)
+  selectedId.value = id
+  await nextTick()
+  map.value?.focusRegion(id)
 }
-
+function toggle(id: number, event: Event): void {
+  store.setVisible(id, (event.target as HTMLInputElement).checked)
+}
 onMounted(() => {
-  store.clear()
-  void loadRegions()
+  void load()
 })
-onBeforeUnmount(() => {
-  listRequest?.abort()
-  boundaryRequest?.abort()
-  store.clear()
-})
+onBeforeUnmount(() => request?.abort())
 </script>
 
 <template>
-  <AccessPageHeader
-    title="Mapas"
-    description="Consulta los límites regionales registrados y explora su ubicación."
-  />
+  <MapsPageHeader
+    title="Visor general"
+    description="Explora los límites regionales de La Paz. Elige qué regiones quieres ver en el mapa."
+  >
+    <template #actions>
+      <button type="button" class="kt-btn kt-btn-outline" :disabled="loading" @click="load">
+        <i
+          class="ki-filled ki-arrows-circle"
+          :class="{ 'animate-spin': loading }"
+          aria-hidden="true"
+        />
+        {{ loading ? 'Actualizando…' : 'Actualizar' }}
+      </button>
+      <RouterLink
+        v-if="auth.hasPermission('maps.view')"
+        :to="{ name: 'maps.layers' }"
+        class="kt-btn kt-btn-primary"
+      >
+        <i class="ki-filled ki-map" aria-hidden="true" /> Gestionar capas
+      </RouterLink>
+    </template>
+  </MapsPageHeader>
   <div class="kt-container-fixed pb-6">
-    <div class="grid min-w-0 grid-cols-1 items-start gap-5 xl:grid-cols-[300px_minmax(0,1fr)]">
-      <aside class="kt-card min-w-0" aria-label="Selección de región">
-        <div class="kt-card-header"><h2 class="kt-card-title">Regiones</h2></div>
-        <div class="kt-card-content flex flex-col gap-4">
-          <form class="flex flex-col gap-2" @submit.prevent="loadRegions(1)">
-            <label for="map-region-search" class="text-sm font-medium text-foreground"
-              >Buscar región</label
-            >
-            <input
-              id="map-region-search"
-              v-model="search"
-              type="search"
-              maxlength="150"
-              placeholder="Nombre o código"
-              class="kt-input w-full"
-            />
-            <button
-              class="kt-btn kt-btn-primary justify-center"
-              type="submit"
-              :disabled="loadingRegions"
-            >
-              Buscar
-            </button>
-          </form>
-          <p v-if="loadingRegions" role="status" class="text-sm text-secondary-foreground">
-            Buscando regiones…
-          </p>
-          <div v-else-if="listError" role="alert" class="flex flex-col gap-2 text-sm">
-            <p class="text-destructive">{{ listError }}</p>
-            <button class="kt-btn kt-btn-outline justify-center" @click="loadRegions()">
-              Reintentar
-            </button>
-          </div>
-          <template v-else>
-            <p v-if="!regions.length" role="status" class="py-5 text-sm text-secondary-foreground">
-              No se encontraron regiones.
-            </p>
-            <div v-else class="flex flex-col gap-2">
-              <button
-                v-for="region in regions"
-                :key="region.id"
-                type="button"
-                class="flex w-full items-center justify-between gap-2 rounded-lg border p-3 text-start transition-colors hover:bg-secondary"
-                :class="selected?.id === region.id ? 'border-primary bg-secondary' : 'border-input'"
-                :aria-pressed="selected?.id === region.id"
-                @click="selectRegion(region)"
-              >
-                <span class="min-w-0">
-                  <span class="block break-words text-sm font-semibold text-foreground">{{
-                    region.name
-                  }}</span>
-                  <span class="block text-xs text-secondary-foreground">{{
-                    region.code || 'Sin código'
-                  }}</span>
-                </span>
-                <span
-                  class="kt-badge kt-badge-sm"
-                  :class="region.active ? 'kt-badge-success' : 'kt-badge-secondary'"
-                >
-                  {{ region.active ? 'Activa' : 'Inactiva' }}
-                </span>
-              </button>
-            </div>
-            <div v-if="meta && meta.last_page > 1" class="flex items-center justify-between gap-2">
-              <button
-                class="kt-btn kt-btn-sm kt-btn-outline"
-                :disabled="meta.current_page <= 1"
-                @click="loadRegions(meta.current_page - 1)"
-                aria-label="Página anterior"
-              >
-                Anterior
-              </button>
-              <span class="text-xs text-secondary-foreground"
-                >{{ meta.current_page }} / {{ meta.last_page }}</span
-              >
-              <button
-                class="kt-btn kt-btn-sm kt-btn-outline"
-                :disabled="meta.current_page >= meta.last_page"
-                @click="loadRegions(meta.current_page + 1)"
-                aria-label="Página siguiente"
-              >
-                Siguiente
-              </button>
-            </div>
-          </template>
-        </div>
-      </aside>
-
-      <section class="kt-card min-w-0" aria-label="Visor cartográfico" :aria-busy="loadingBoundary">
-        <div class="kt-card-header flex-wrap gap-2">
-          <h2 class="kt-card-title">{{ selected?.name || 'Visor regional' }}</h2>
-          <span class="kt-badge kt-badge-outline">Solo consulta</span>
-        </div>
-        <div class="kt-card-content flex min-w-0 flex-col gap-4">
-          <div
-            v-if="loadingBoundary"
-            role="status"
-            class="flex min-h-96 items-center justify-center text-sm text-secondary-foreground"
-          >
-            Cargando límite regional…
-          </div>
-          <div
-            v-else-if="boundaryError"
-            role="alert"
-            class="flex min-h-96 flex-col items-center justify-center gap-4 text-center"
-          >
-            <p class="text-sm text-destructive">{{ boundaryError }}</p>
-            <button
-              v-if="selected"
-              type="button"
-              class="kt-btn kt-btn-outline"
-              @click="selectRegion(selected)"
-            >
-              Reintentar
-            </button>
-          </div>
-          <div
-            v-else-if="missingBoundary"
-            role="status"
-            class="flex min-h-96 flex-col items-center justify-center gap-3 text-center"
-          >
-            <i
-              class="ki-filled ki-geolocation text-4xl text-muted-foreground"
-              aria-hidden="true"
-            ></i>
-            <h3 class="text-base font-semibold text-foreground">Sin límite disponible</h3>
-            <p class="max-w-sm text-sm text-secondary-foreground">
-              Esta región todavía no tiene un polígono registrado o ya no está disponible.
-            </p>
-          </div>
-          <template v-else-if="boundary">
-            <MapPreview :boundary="boundary" />
-            <dl class="grid grid-cols-1 gap-4 text-sm sm:grid-cols-3">
-              <div>
-                <dt class="text-secondary-foreground">Región</dt>
-                <dd class="mt-1 font-medium text-foreground">{{ boundary.properties.name }}</dd>
-              </div>
-              <div>
-                <dt class="text-secondary-foreground">Polígonos</dt>
-                <dd class="mt-1 font-medium text-foreground">
-                  {{ boundary.geometry.coordinates.length }}
-                </dd>
-              </div>
-              <div>
-                <dt class="text-secondary-foreground">Última actualización</dt>
-                <dd class="mt-1 font-medium text-foreground">{{ updatedAt }}</dd>
-              </div>
-            </dl>
-          </template>
-          <div
-            v-else
-            class="flex min-h-96 items-center justify-center text-sm text-secondary-foreground"
-          >
-            Selecciona una región para consultar su límite.
-          </div>
-        </div>
-      </section>
+    <div
+      v-if="error"
+      role="alert"
+      class="mb-4 flex flex-wrap items-center justify-between gap-3 rounded-xl border border-destructive/25 bg-destructive/5 p-4 text-sm"
+    >
+      <p class="text-destructive">
+        {{ error }} <span v-if="boundaries.length">Se conserva la última vista disponible.</span>
+      </p>
+      <button class="kt-btn kt-btn-sm kt-btn-outline" :disabled="loading" @click="load">
+        Reintentar
+      </button>
     </div>
+    <section
+      class="overflow-hidden rounded-xl border border-input bg-background shadow-sm"
+      aria-label="Explorador regional"
+      :aria-busy="loading"
+    >
+      <div
+        class="grid min-w-0 md:grid-cols-[280px_minmax(0,1fr)] xl:grid-cols-[300px_minmax(0,1fr)]"
+      >
+        <aside
+          class="flex min-w-0 flex-col border-b border-input md:border-r md:border-b-0"
+          aria-label="Límites regionales"
+        >
+          <div class="p-5 pb-3">
+            <h2 class="text-lg font-semibold tracking-tight text-foreground">Límites regionales</h2>
+            <p class="mt-1 text-xs text-muted-foreground">{{ boundaries.length }} disponibles</p>
+            <label
+              class="mt-5 flex items-center gap-2 rounded-lg border border-input px-3 focus-within:border-primary focus-within:ring-1 focus-within:ring-primary"
+            >
+              <i class="ki-filled ki-magnifier text-muted-foreground" aria-hidden="true" />
+              <input
+                v-model="search"
+                type="search"
+                maxlength="150"
+                aria-label="Buscar región"
+                placeholder="Buscar región…"
+                class="h-10 w-full min-w-0 bg-transparent text-sm outline-none"
+              />
+            </label>
+            <div class="mt-4 flex flex-wrap gap-x-5 gap-y-2 text-xs font-medium">
+              <button
+                type="button"
+                class="text-primary hover:underline disabled:opacity-40"
+                :disabled="!boundaries.length || visibleIds.length === boundaries.length"
+                @click="store.showAll"
+              >
+                Mostrar todos
+              </button>
+              <button
+                type="button"
+                class="text-primary hover:underline disabled:opacity-40"
+                :disabled="!visibleIds.length"
+                @click="store.hideAll"
+              >
+                Ocultar todos
+              </button>
+            </div>
+          </div>
+          <p
+            v-if="loading && !boundaries.length"
+            role="status"
+            class="px-5 py-8 text-sm text-muted-foreground"
+          >
+            Cargando límites regionales…
+          </p>
+          <div v-else-if="!boundaries.length" class="px-5 py-8">
+            <i class="ki-filled ki-geolocation text-3xl text-muted-foreground" aria-hidden="true" />
+            <h3 class="mt-3 text-sm font-semibold">Aún no hay límites registrados</h3>
+            <p class="mt-2 text-xs leading-5 text-muted-foreground">
+              Carga una capa de tipo «Límite regional» y asígnala a su región para verla en este
+              mapa.
+            </p>
+          </div>
+          <p
+            v-else-if="!filtered.length"
+            role="status"
+            class="px-5 py-8 text-sm text-muted-foreground"
+          >
+            No hay regiones que coincidan con la búsqueda.
+          </p>
+          <ul v-else class="max-h-64 overflow-y-auto px-3 pb-3 md:max-h-[520px]">
+            <li
+              v-for="boundary in filtered"
+              :key="boundary.properties.region_id"
+              class="flex items-center gap-3 border-b border-input/70 px-2 py-4 last:border-0"
+              :class="{ 'rounded-lg bg-secondary': selectedId === boundary.properties.region_id }"
+            >
+              <label class="flex min-w-0 flex-1 cursor-pointer items-center gap-3">
+                <input
+                  type="checkbox"
+                  class="kt-checkbox shrink-0"
+                  :checked="visibleIds.includes(boundary.properties.region_id)"
+                  :aria-label="'Mostrar ' + boundary.properties.name"
+                  @change="toggle(boundary.properties.region_id, $event)"
+                />
+                <span
+                  class="h-3 w-3 shrink-0 rounded-full"
+                  :style="{ backgroundColor: regionColor(boundary.properties.region_id) }"
+                  aria-hidden="true"
+                />
+                <span class="min-w-0">
+                  <span class="block break-words text-sm font-medium leading-5 text-foreground">{{
+                    boundary.properties.name
+                  }}</span>
+                  <span class="mt-1 block text-xs text-muted-foreground">{{
+                    visibleIds.includes(boundary.properties.region_id)
+                      ? 'Visible en el mapa'
+                      : 'Límite oculto'
+                  }}</span>
+                </span>
+              </label>
+              <button
+                type="button"
+                class="kt-btn kt-btn-sm kt-btn-icon kt-btn-ghost shrink-0"
+                :aria-label="'Centrar ' + boundary.properties.name"
+                :title="'Centrar ' + boundary.properties.name"
+                @click="focusRegion(boundary.properties.region_id)"
+              >
+                <i class="ki-filled ki-geolocation" aria-hidden="true" />
+              </button>
+            </li>
+          </ul>
+        </aside>
+        <RegionalMap
+          ref="map"
+          :boundaries="boundaries"
+          :visible-ids="visibleIds"
+          :selected-id="selectedId"
+          @select="selectedId = $event"
+        />
+      </div>
+      <footer
+        class="flex flex-wrap items-center justify-between gap-2 border-t border-input px-5 py-4"
+      >
+        <p role="status" class="text-sm font-medium text-foreground">
+          {{ visibleIds.length }} de {{ boundaries.length }} regiones visibles
+        </p>
+        <p class="text-xs text-muted-foreground">Desmarca una región para ocultar su límite.</p>
+      </footer>
+    </section>
   </div>
 </template>
