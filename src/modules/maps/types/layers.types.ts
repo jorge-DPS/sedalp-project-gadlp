@@ -9,6 +9,7 @@ export interface LayerSummary {
   repaired_features?: number
 }
 export interface MapCollection extends FeatureCollection<Geometry> {
+  version_id?: number
   summary?: LayerSummary
 }
 export interface MapVersion {
@@ -25,5 +26,18 @@ export interface MapLayer {
   kind: 'boundary' | 'overlay'
   region_id: number | null
   region: Pick<MapRegion, 'id' | 'name'> | null
+  category: MapCategory
+  publication_status: 'draft' | 'published' | 'pending'
+  published_version: MapVersion | null
+  published_at: string | null
   current_version: MapVersion
 }
+
+export const mapCategories = {
+  boundaries: 'Límites regionales',
+  roads: 'Carreteras y rutas',
+  rivers: 'Ríos',
+  cableways: 'Teleféricos',
+  other: 'Otros / puntos de interés',
+} as const
+export type MapCategory = keyof typeof mapCategories

@@ -1,6 +1,9 @@
 <script setup lang="ts">
 import { onBeforeUnmount, onMounted, ref, shallowRef } from 'vue'
 import MapsPageHeader from '../components/MapsPageHeader.vue'
+import MapPublicationModal from '../components/MapPublicationModal.vue'
+import MapPublicationBadge from '../components/MapPublicationBadge.vue'
+import { mapCategories } from '../types/layers.types'
 import MapPreview from '../components/MapPreview.vue'
 import MapLayerUploadModal from '../components/MapLayerUploadModal.vue'
 import { layersApi } from '../api/layers.api'
@@ -24,6 +27,7 @@ const detailError = ref('')
 const success = ref('')
 const editing = ref(false)
 const updating = ref(false)
+const publication = ref<'publish' | 'withdraw' | null>(null)
 let listRequest: AbortController | undefined
 let detailRequest: AbortController | undefined
 
@@ -56,15 +60,20 @@ async function select(layer: MapLayer): Promise<void> {
   detailError.value = ''
   loadingMap.value = true
   try {
-    const [collection, history] = await Promise.all([
+    const [collection, history, fresh] = await Promise.all([
       layersApi.geometry(layer.id, request.signal),
       layersApi.versions(layer.id, 1, request.signal),
+      layersApi.show(layer.id, request.signal),
     ])
     if (request.signal.aborted) return
+    if (collection.version_id !== fresh.current_version.id) {
+      detailError.value =
+        'La capa cambió mientras se cargaba. Pulsa Reintentar mapa para revisar la nueva versión.'
+      return
+    }
     geometry.value = collection
     versions.value = history.data
-    const currentVersion = history.data[0]
-    if (currentVersion) selected.value = { ...layer, current_version: currentVersion }
+    selected.value = fresh
   } catch (failure) {
     if (!request.signal.aborted) detailError.value = getApiError(failure).message
   } finally {
@@ -90,8 +99,19 @@ async function cancelEditing(): Promise<void> {
 }
 async function saved(layer: MapLayer): Promise<void> {
   editing.value = false
-  success.value = 'Capa guardada correctamente.'
+  success.value = 'Archivo guardado para revisión. La publicación no cambió.'
   await Promise.all([load(), select(layer)])
+}
+async function closePublication(): Promise<void> {
+  publication.value = null
+  if (selected.value) await Promise.all([load(page.value), select(selected.value)])
+}
+async function publicationSaved(layer: MapLayer): Promise<void> {
+  success.value = layer.published_version
+    ? 'La versión está disponible en la API pública.'
+    : 'La capa se retiró de la API pública.'
+  publication.value = null
+  await Promise.all([load(page.value), select(layer)])
 }
 onMounted(() => {
   void load()
@@ -141,6 +161,13 @@ onBeforeUnmount(() => {
         >Ver en el visor →</RouterLink
       >
     </div>
+    <MapPublicationModal
+      v-if="publication && selected"
+      :layer="selected"
+      :withdraw="publication === 'withdraw'"
+      @cancel="closePublication"
+      @saved="publicationSaved"
+    />
     <MapLayerUploadModal
       v-if="editing"
       :layer="updating ? selected : undefined"
@@ -234,8 +261,9 @@ onBeforeUnmount(() => {
                   >
                   <span
                     class="mt-2 inline-block rounded-md bg-secondary px-2 py-0.5 text-[11px] font-medium text-muted-foreground"
-                    >{{ layer.kind === 'boundary' ? 'Límite regional' : 'Capa temática' }}</span
+                    >{{ mapCategories[layer.category] }}</span
                   >
+                  <MapPublicationBadge :status="layer.publication_status" />
                 </span>
               </button>
             </li>
@@ -310,6 +338,52 @@ onBeforeUnmount(() => {
                 Reintentar mapa
               </button>
             </div>
+            <section
+              class="rounded-xl border border-input bg-secondary/25 p-4 sm:p-5"
+              aria-label="Estado de publicación"
+            >
+              <div class="flex flex-wrap items-start justify-between gap-4">
+                <div class="min-w-0 flex-1">
+                  <MapPublicationBadge :status="selected.publication_status" />
+                  <p class="mt-3 text-sm font-medium">{{ mapCategories[selected.category] }}</p>
+                  <p class="mt-1 text-sm leading-6 text-muted-foreground">
+                    <template v-if="selected.published_version">
+                      Versión pública: {{ selected.published_version.number }}.
+                      <template v-if="selected.publication_status === 'pending'"
+                        >La versión {{ selected.current_version.number }} tiene cambios pendientes
+                        de publicación.</template
+                      >
+                      <template v-else>El público puede consultar esta versión.</template>
+                    </template>
+                    <template v-else>Esta capa solo está disponible en el administrador.</template>
+                  </p>
+                </div>
+                <div
+                  v-if="auth.hasPermission('maps.publish')"
+                  class="flex w-full flex-wrap gap-2 sm:w-auto"
+                >
+                  <button
+                    v-if="selected.publication_status !== 'published'"
+                    class="kt-btn kt-btn-primary"
+                    :disabled="loadingMap || !!detailError"
+                    @click="publication = 'publish'"
+                  >
+                    Publicar versión {{ selected.current_version.number }}
+                  </button>
+                  <button
+                    v-if="selected.published_version"
+                    class="kt-btn kt-btn-outline"
+                    :disabled="loadingMap || !!detailError"
+                    @click="publication = 'withdraw'"
+                  >
+                    Retirar publicación
+                  </button>
+                </div>
+              </div>
+            </section>
+            <p v-if="geometry" class="text-xs font-medium text-muted-foreground">
+              Vista previa administrativa · versión {{ selected.current_version.number }}
+            </p>
             <MapPreview v-if="geometry" :collection="geometry" :label="selected.name" />
             <details v-if="versions.length" class="rounded-lg border border-input p-4">
               <summary class="cursor-pointer text-sm font-medium">
@@ -321,6 +395,11 @@ onBeforeUnmount(() => {
                   :key="version.id"
                   class="break-words py-3 text-muted-foreground"
                 >
+                  <span
+                    v-if="version.id === selected.published_version?.id"
+                    class="me-2 rounded-md bg-emerald-500/10 px-2 py-1 text-xs font-medium text-emerald-700 dark:text-emerald-400"
+                    >Pública</span
+                  >
                   v{{ version.number }} · {{ version.source_filename }} ·
                   {{ version.summary.feature_count }} elementos ·
                   {{ new Date(version.created_at).toLocaleDateString('es-BO') }}

@@ -1,6 +1,6 @@
 import api from '@/services/api'
 import type { DataResponse, PaginatedResponse } from '@/shared/api/types'
-import type { MapCollection, MapLayer, MapVersion } from '../types/layers.types'
+import type { MapCategory, MapCollection, MapLayer, MapVersion } from '../types/layers.types'
 
 export const layersApi = {
   async list(search = '', page = 1, signal?: AbortSignal) {
@@ -10,6 +10,22 @@ export const layersApi = {
         signal,
       })
     ).data
+  },
+  async show(id: number, signal?: AbortSignal) {
+    return (await api.get<DataResponse<MapLayer>>('/admin/map-layers/' + id, { signal })).data.data
+  },
+  async publication(layer: MapLayer, withdraw: boolean, category: MapCategory) {
+    const payload = {
+      expected_version_id: layer.current_version.id,
+      expected_published_version_id: layer.published_version?.id ?? null,
+      ...(!withdraw ? { category } : {}),
+    }
+    const url = '/admin/map-layers/' + layer.id + '/publication'
+    return (
+      withdraw
+        ? await api.delete<DataResponse<MapLayer>>(url, { data: payload })
+        : await api.put<DataResponse<MapLayer>>(url, payload)
+    ).data.data
   },
   async geometry(id: number, signal?: AbortSignal) {
     return (await api.get<MapCollection>(`/admin/map-layers/${id}/geojson`, { signal })).data

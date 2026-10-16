@@ -3,7 +3,8 @@ import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import { useAuthStore } from '@/stores/auth'
 import { mapsApi } from '../api/maps.api'
 import { layersApi } from '../api/layers.api'
-import type { MapCollection, MapLayer } from '../types/layers.types'
+import { mapCategories } from '../types/layers.types'
+import type { MapCategory, MapCollection, MapLayer } from '../types/layers.types'
 import type { MapRegion } from '../types/maps.types'
 import MapPreview from './MapPreview.vue'
 import { getApiError } from '@/shared/api/errors'
@@ -14,6 +15,7 @@ const auth = useAuthStore()
 const name = ref('')
 const description = ref('')
 const kind = ref<'overlay' | 'boundary'>('overlay')
+const category = ref<MapCategory>('other')
 const regionId = ref('')
 const regions = ref<MapRegion[]>([])
 const file = ref<File | null>(null)
@@ -97,6 +99,7 @@ async function save(): Promise<void> {
     form.append('name', name.value.trim())
     form.append('description', description.value.trim())
     form.append('kind', kind.value)
+    form.append('category', isBoundary.value ? 'boundaries' : category.value)
     if (regionId.value) form.append('region_id', regionId.value)
   }
   try {
@@ -115,6 +118,10 @@ async function save(): Promise<void> {
       Sube un GeoJSON en WGS84 o un ZIP con una sola capa Shapefile: .shp, .shx, .dbf y .prj;
       incluye .cpg si existe. Todos deben tener el mismo nombre. Máximo 10 MB. No incluyas archivos
       .gpkg.
+    </p>
+    <p class="mt-3 text-xs font-medium text-muted-foreground">
+      Guardar un archivo no lo publica. Revisa la capa y utiliza «Publicar versión» cuando esté
+      lista.
     </p>
     <form class="mt-5 flex flex-col gap-4" @submit.prevent="save">
       <fieldset :disabled="busy" class="flex min-w-0 flex-col gap-4">
@@ -142,6 +149,14 @@ async function save(): Promise<void> {
                 >
                   Límite regional
                 </option>
+              </select>
+            </label>
+            <label v-if="!isBoundary" class="flex flex-col gap-2 text-sm">
+              Categoría
+              <select v-model="category" class="kt-select" required>
+                <template v-for="(label, value) in mapCategories" :key="value">
+                  <option v-if="value !== 'boundaries'" :value="value">{{ label }}</option>
+                </template>
               </select>
             </label>
             <label v-if="auth.hasPermission('regions.view')" class="flex flex-col gap-2 text-sm"
@@ -191,7 +206,8 @@ async function save(): Promise<void> {
           </div>
         </template>
         <p v-else class="text-sm text-muted-foreground">
-          Se creará una nueva versión. El archivo anterior quedará conservado en el historial.
+          Se creará una nueva versión para revisión. La versión publicada seguirá visible hasta que
+          publiques este nuevo archivo.
         </p>
         <label class="flex flex-col gap-2 text-sm"
           >Archivo cartográfico · ZIP o GeoJSON
