@@ -88,6 +88,22 @@ export const newsApi = {
     return data.data
   },
 
+  async removeImages(
+    newsId: number,
+    ids: number[],
+  ): Promise<{
+    data: NewsImage[]
+    media_cleanup_pending: boolean
+    media_cleanup_retry_failed: boolean
+  }> {
+    const { data } = await api.delete<{
+      data: NewsImage[]
+      media_cleanup_pending: boolean
+      media_cleanup_retry_failed: boolean
+    }>(`/admin/news/${newsId}/images`, { data: { ids } })
+    return data
+  },
+
   async removeImage(newsId: number, imageId: number): Promise<void> {
     await api.delete(`/admin/news/${newsId}/images/${imageId}`)
   },

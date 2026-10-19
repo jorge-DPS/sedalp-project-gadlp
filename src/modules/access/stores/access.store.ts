@@ -1,5 +1,5 @@
 import { defineStore } from 'pinia'
-import { computed, ref } from 'vue'
+import { ref } from 'vue'
 
 import { accessApi } from '@/modules/access/api/access.api'
 import type {
@@ -18,13 +18,8 @@ export const useAccessStore = defineStore('access', () => {
   const professions = ref<Profession[]>([])
   const loading = ref(false)
 
-  const catalogsLoaded = computed(
-    () =>
-      roles.value.length > 0 &&
-      organizationalUnits.value.length > 0 &&
-      positions.value.length > 0 &&
-      professions.value.length > 0,
-  )
+  const catalogsLoaded = ref(false)
+  const catalogsError = ref('')
 
   async function loadAccessMatrix(): Promise<void> {
     loading.value = true
@@ -42,20 +37,47 @@ export const useAccessStore = defineStore('access', () => {
     if (catalogsLoaded.value && !force) return
 
     loading.value = true
+    catalogsError.value = ''
     try {
-      ;[roles.value, organizationalUnits.value, positions.value, professions.value] =
-        await Promise.all([
-          accessApi.getRoles(),
-          accessApi.getOrganizationalUnits(),
-          accessApi.getPositions(),
-          accessApi.getProfessions(),
-        ])
+      const catalogs = await accessApi.getUserCatalogs()
+      roles.value = catalogs.roles
+      organizationalUnits.value = catalogs.organizational_units
+      positions.value = catalogs.positions
+      professions.value = catalogs.professions
+      catalogsLoaded.value = true
+    } catch {
+      catalogsLoaded.value = false
+      catalogsError.value = 'No se pudieron cargar las opciones. Reintenta antes de guardar.'
     } finally {
       loading.value = false
     }
   }
 
+  async function createOrganizationalUnit(
+    payload: Parameters<typeof accessApi.createOrganizationalUnit>[0],
+  ): Promise<OrganizationalUnit> {
+    const item = await accessApi.createOrganizationalUnit(payload)
+    organizationalUnits.value = [
+      ...organizationalUnits.value.filter((existing) => existing.id !== item.id),
+      item,
+    ].sort((a, b) => a.name.localeCompare(b.name, 'es'))
+    return item
+  }
+
+  async function createProfession(
+    payload: Parameters<typeof accessApi.createProfession>[0],
+  ): Promise<Profession> {
+    const item = await accessApi.createProfession(payload)
+    professions.value = [
+      ...professions.value.filter((existing) => existing.id !== item.id),
+      item,
+    ].sort((a, b) => a.name.localeCompare(b.name, 'es'))
+    return item
+  }
+
   return {
+    createOrganizationalUnit,
+    createProfession,
     roles,
     permissions,
     organizationalUnits,
@@ -63,6 +85,7 @@ export const useAccessStore = defineStore('access', () => {
     professions,
     loading,
     catalogsLoaded,
+    catalogsError,
     loadAccessMatrix,
     loadUserCatalogs,
   }

@@ -9,6 +9,42 @@ import type {
 } from '@/modules/access/types/access.types'
 
 export const accessApi = {
+  async createOrganizationalUnit(payload: {
+    name: string
+    code: string
+    description: string | null
+  }): Promise<OrganizationalUnit> {
+    const { data } = await api.post<DataResponse<OrganizationalUnit>>(
+      '/admin/organizational-units',
+      { ...payload, active: true },
+    )
+    return data.data
+  },
+
+  async createProfession(payload: { name: string }): Promise<Profession> {
+    const { data } = await api.post<DataResponse<Profession>>('/admin/professions', {
+      ...payload,
+      active: true,
+    })
+    return data.data
+  },
+
+  async getUserCatalogs(): Promise<{
+    roles: Role[]
+    organizational_units: OrganizationalUnit[]
+    positions: Position[]
+    professions: Profession[]
+  }> {
+    const { data } = await api.get<
+      DataResponse<{
+        roles: Role[]
+        organizational_units: OrganizationalUnit[]
+        positions: Position[]
+        professions: Profession[]
+      }>
+    >('/admin/users/catalogs')
+    return data.data
+  },
   async getRoles(): Promise<Role[]> {
     const { data } = await api.get<DataResponse<Role[]>>('/admin/access/roles')
     return data.data

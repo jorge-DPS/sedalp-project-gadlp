@@ -8,6 +8,11 @@ export interface StaffMember {
   first_names: string
   paternal_surname: string | null
   maternal_surname: string | null
+  birth_date: string | null
+  ci: string
+  ci_complement: string | null
+  phone: string | null
+  email: string | null
   active: boolean
   organizational_unit: Pick<OrganizationalUnit, 'id' | 'name'> | null
   position: Pick<Position, 'id' | 'name'> | null
@@ -50,9 +55,9 @@ export interface StaffMemberPayload {
   ci_complement?: string | null
   phone?: string | null
   email?: string | null
-  organizational_unit_id: number
+  organizational_unit_id?: number | null
   position_id: number
-  profession_id: number
+  profession_id?: number | null
 }
 
 export interface CreateUserPayload {

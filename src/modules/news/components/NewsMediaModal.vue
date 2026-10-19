@@ -34,9 +34,42 @@ const images = ref<NewsImage[]>([])
 const videos = ref<NewsVideo[]>([])
 const busy = ref(false)
 const error = ref('')
+const notice = ref('')
+const selectingImages = ref(false)
+const selectedImageIds = ref<number[]>([])
+const confirmingImages = ref(false)
+
+function cancelImageSelection(): void {
+  selectingImages.value = false
+  selectedImageIds.value = []
+  confirmingImages.value = false
+}
+
+function toggleImageSelection(id: number): void {
+  if (busy.value || confirmingImages.value) return
+  if (selectedImageIds.value.includes(id)) {
+    selectedImageIds.value = selectedImageIds.value.filter((selected) => selected !== id)
+  } else if (selectedImageIds.value.length < 100) {
+    selectedImageIds.value.push(id)
+  }
+}
+
+async function deleteSelectedImages(): Promise<void> {
+  if (!props.news || busy.value || !selectedImageIds.value.length) return
+  await run(async () => {
+    const response = await newsApi.removeImages(props.news!.id, [...selectedImageIds.value])
+    images.value = response.data
+    notice.value = response.media_cleanup_retry_failed
+      ? 'Imágenes retiradas de la galería. No se pudo programar la limpieza de algunos archivos; contacte al administrador.'
+      : response.media_cleanup_pending
+        ? 'Imágenes eliminadas de la galería. La limpieza de algunos archivos está pendiente de reintento.'
+        : 'Imágenes eliminadas. El orden se actualizó automáticamente.'
+    cancelImageSelection()
+  })
+}
 const queuedImages = ref<QueuedImage[]>([])
 const videoForm = reactive({ youtubeUrl: '', title: '' })
-const pendingDelete = ref<{ type: 'image' | 'video'; id: number; label: string } | null>(null)
+const pendingDelete = ref<{ type: 'video'; id: number; label: string } | null>(null)
 
 function clearQueuedImages(): void {
   queuedImages.value.forEach((image) => URL.revokeObjectURL(image.previewUrl))
@@ -44,8 +77,9 @@ function clearQueuedImages(): void {
 }
 
 watch(
-  () => [props.open, props.news] as const,
-  ([open, news]) => {
+  () => [props.open, props.news?.id] as const,
+  ([open]) => {
+    const news = props.news
     if (!open || !news) {
       clearQueuedImages()
       return
@@ -56,6 +90,8 @@ watch(
     videoForm.youtubeUrl = ''
     videoForm.title = ''
     pendingDelete.value = null
+    cancelImageSelection()
+    notice.value = ''
     error.value = ''
   },
   { immediate: true },
@@ -112,7 +148,9 @@ function removeQueuedImage(imageId: string): void {
 }
 
 async function run(operation: () => Promise<void>): Promise<void> {
+  if (busy.value) return
   error.value = ''
+  notice.value = ''
   busy.value = true
   try {
     await operation()
@@ -185,13 +223,8 @@ async function confirmDelete(): Promise<void> {
   const target = pendingDelete.value
 
   await run(async () => {
-    if (target.type === 'image') {
-      await newsApi.removeImage(props.news!.id, target.id)
-      images.value = images.value.filter((image) => image.id !== target.id)
-    } else {
-      await newsApi.removeVideo(props.news!.id, target.id)
-      videos.value = videos.value.filter((video) => video.id !== target.id)
-    }
+    await newsApi.removeVideo(props.news!.id, target.id)
+    videos.value = videos.value.filter((video) => video.id !== target.id)
     pendingDelete.value = null
   })
 }
@@ -222,7 +255,7 @@ async function moveMedia(type: 'image' | 'video', index: number, offset: -1 | 1)
     role="dialog"
     aria-modal="true"
     aria-label="Administrar medios"
-    @click.self="emit('close')"
+    @click.self="!busy && emit('close')"
   >
     <div class="kt-card max-h-[92vh] w-full max-w-5xl overflow-y-auto">
       <div class="kt-card-header sticky top-0 z-10 bg-background">
@@ -236,6 +269,7 @@ async function moveMedia(type: 'image' | 'video', index: number, offset: -1 | 1)
           class="kt-btn kt-btn-sm kt-btn-icon kt-btn-ghost"
           type="button"
           aria-label="Cerrar administrador multimedia"
+          :disabled="busy"
           @click="emit('close')"
         >
           <i class="ki-filled ki-cross"></i>
@@ -243,9 +277,20 @@ async function moveMedia(type: 'image' | 'video', index: number, offset: -1 | 1)
       </div>
 
       <div class="kt-card-content flex flex-col gap-8 pb-24">
-        <div v-if="error" class="rounded-lg bg-destructive/10 p-3 text-sm text-destructive">
+        <div
+          v-if="error"
+          role="alert"
+          class="rounded-lg bg-destructive/10 p-3 text-sm text-destructive"
+        >
           {{ error }}
         </div>
+        <p
+          v-if="notice"
+          role="status"
+          class="rounded-lg border border-border bg-muted/30 p-3 text-sm"
+        >
+          {{ notice }}
+        </p>
         <div
           v-if="pendingDelete"
           class="flex flex-wrap items-center justify-between gap-3 rounded-lg border border-destructive/30 bg-destructive/5 p-3 text-sm"
@@ -278,7 +323,106 @@ async function moveMedia(type: 'image' | 'video', index: number, offset: -1 | 1)
               JPG, PNG o WebP; máximo 10 MB por imagen.
             </p>
           </div>
-          <form class="rounded-xl border border-border p-4" @submit.prevent="addImages">
+          <div
+            v-if="images.length"
+            class="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-border bg-muted/20 p-4"
+          >
+            <div aria-live="polite">
+              <p class="text-sm font-medium text-mono">
+                {{
+                  selectingImages
+                    ? `${selectedImageIds.length} ${selectedImageIds.length === 1 ? 'imagen seleccionada' : 'imágenes seleccionadas'}`
+                    : `${images.length} imágenes en la galería`
+                }}
+              </p>
+              <p class="mt-1 text-xs text-secondary-foreground">
+                {{
+                  selectingImages
+                    ? 'Marca las imágenes que deseas eliminar (máximo 100 por operación).'
+                    : 'Organiza las imágenes o selecciona varias para eliminarlas.'
+                }}
+              </p>
+            </div>
+            <div class="flex flex-wrap gap-2">
+              <template v-if="selectingImages">
+                <button
+                  type="button"
+                  class="kt-btn kt-btn-sm kt-btn-light"
+                  :disabled="busy || confirmingImages"
+                  @click="selectedImageIds = images.slice(0, 100).map((image) => image.id)"
+                >
+                  Seleccionar {{ images.length > 100 ? 'primeras 100' : 'todas' }}
+                </button>
+                <button
+                  type="button"
+                  class="kt-btn kt-btn-sm kt-btn-light"
+                  :disabled="busy"
+                  @click="cancelImageSelection"
+                >
+                  Cancelar
+                </button>
+                <button
+                  type="button"
+                  class="kt-btn kt-btn-sm kt-btn-destructive"
+                  :disabled="busy || confirmingImages || !selectedImageIds.length"
+                  @click="confirmingImages = true"
+                >
+                  Eliminar seleccionadas ({{ selectedImageIds.length }})
+                </button>
+              </template>
+              <button
+                v-else
+                type="button"
+                class="kt-btn kt-btn-sm kt-btn-outline text-destructive"
+                :disabled="busy || !!pendingDelete"
+                @click="selectingImages = true"
+              >
+                <i class="ki-filled ki-trash" aria-hidden="true"></i>
+                Eliminar imágenes
+              </button>
+            </div>
+          </div>
+
+          <div
+            v-if="confirmingImages"
+            role="group"
+            aria-label="Confirmar eliminación de imágenes"
+            class="rounded-xl border border-destructive/30 bg-destructive/5 p-4"
+          >
+            <p class="font-semibold text-mono">
+              ¿Eliminar {{ selectedImageIds.length }}
+              {{ selectedImageIds.length === 1 ? 'imagen' : 'imágenes' }} definitivamente?
+            </p>
+            <p class="mt-1 text-sm text-secondary-foreground">
+              Se eliminarán las imágenes seleccionadas y sus archivos. Esta acción no se puede
+              deshacer. Las restantes conservarán su orden.
+            </p>
+            <div class="mt-4 flex flex-wrap justify-end gap-2">
+              <button
+                type="button"
+                class="kt-btn kt-btn-light"
+                :disabled="busy"
+                @click="confirmingImages = false"
+              >
+                Volver a la selección
+              </button>
+              <button
+                type="button"
+                class="kt-btn kt-btn-destructive"
+                :disabled="busy"
+                @click="deleteSelectedImages"
+              >
+                <span v-if="busy" class="kt-spinner kt-spinner-sm"></span>
+                {{ busy ? 'Eliminando…' : 'Confirmar eliminación' }}
+              </button>
+            </div>
+          </div>
+
+          <form
+            v-if="!selectingImages"
+            class="rounded-xl border border-border p-4"
+            @submit.prevent="addImages"
+          >
             <label
               class="group flex cursor-pointer flex-col items-center justify-center gap-2 rounded-xl border-2 border-dashed border-border bg-muted/20 px-5 py-7 text-center transition-colors hover:border-primary/60 hover:bg-primary/5"
             >
@@ -367,9 +511,31 @@ async function moveMedia(type: 'image' | 'video', index: number, offset: -1 | 1)
             <article
               v-for="(image, index) in images"
               :key="image.id"
-              class="rounded-lg border border-border p-4"
+              class="relative rounded-xl border p-4 transition-colors"
+              :class="
+                selectingImages && selectedImageIds.includes(image.id)
+                  ? 'border-destructive/50 bg-destructive/5 ring-1 ring-destructive/30'
+                  : 'border-border'
+              "
             >
-              <div class="mb-3 flex gap-3">
+              <label
+                v-if="selectingImages"
+                class="absolute inset-0 z-10 cursor-pointer rounded-xl focus-within:ring-2 focus-within:ring-primary"
+              >
+                <input
+                  type="checkbox"
+                  class="absolute right-4 top-4 size-5 accent-red-600"
+                  :checked="selectedImageIds.includes(image.id)"
+                  :disabled="
+                    busy ||
+                    confirmingImages ||
+                    (selectedImageIds.length >= 100 && !selectedImageIds.includes(image.id))
+                  "
+                  :aria-label="`Seleccionar imagen ${index + 1}: ${image.alt}`"
+                  @change="toggleImageSelection(image.id)"
+                />
+              </label>
+              <div class="mb-3 flex gap-3" :class="{ 'pr-8': selectingImages }">
                 <img
                   :src="newsImageUrl(image)"
                   :alt="image.alt"
@@ -379,7 +545,7 @@ async function moveMedia(type: 'image' | 'video', index: number, offset: -1 | 1)
                   <p class="truncate text-sm font-medium text-mono">{{ image.filename }}.webp</p>
                   <p class="text-xs text-secondary-foreground">Posición {{ index + 1 }}</p>
                 </div>
-                <div class="flex gap-1">
+                <div v-if="!selectingImages" class="flex gap-1">
                   <button
                     class="kt-btn kt-btn-sm kt-btn-icon kt-btn-light"
                     type="button"
@@ -400,7 +566,7 @@ async function moveMedia(type: 'image' | 'video', index: number, offset: -1 | 1)
                   </button>
                 </div>
               </div>
-              <div class="flex flex-col gap-2">
+              <div v-if="!selectingImages" class="flex flex-col gap-2">
                 <input
                   v-model="image.alt"
                   class="kt-input"
@@ -417,14 +583,6 @@ async function moveMedia(type: 'image' | 'video', index: number, offset: -1 | 1)
                   >
                     Guardar
                   </button>
-                  <button
-                    class="kt-btn kt-btn-sm kt-btn-ghost text-destructive"
-                    type="button"
-                    :disabled="busy"
-                    @click="pendingDelete = { type: 'image', id: image.id, label: 'esta imagen' }"
-                  >
-                    Eliminar
-                  </button>
                 </div>
               </div>
             </article>
@@ -434,7 +592,7 @@ async function moveMedia(type: 'image' | 'video', index: number, offset: -1 | 1)
           </div>
         </section>
 
-        <section class="flex flex-col gap-4 border-t border-border pt-7">
+        <section v-if="!selectingImages" class="flex flex-col gap-4 border-t border-border pt-7">
           <div>
             <h4 class="font-semibold text-mono">Videos de YouTube</h4>
             <p class="text-xs text-secondary-foreground">
